@@ -6,6 +6,7 @@ define(function (require, exports, module) {
 
     var CommandManager = brackets.getModule("command/CommandManager"),
         EditorManager = brackets.getModule("editor/EditorManager"),
+        Editor = brackets.getModule("editor/Editor").Editor,
         DocumentManager = brackets.getModule("document/DocumentManager"),
         EditorUtils = brackets.getModule("editor/EditorUtils"),
         Menus = brackets.getModule("command/Menus"),
@@ -13,47 +14,53 @@ define(function (require, exports, module) {
 
     require('beautify');
     require('beautify-html');
-	require('beautify-css');
+    require('beautify-css');
 
-    var indent_size = 1;
-    var indent_char = '\t';
+    var _useTabs = Editor.getUseTabChar();
+    var _indent_size = Editor.getTabSize();
 
+    if (_useTabs) {
+        var _indent_char = '\t';
+    } else {
+        var _indent_char = ' ';
+    }
 
     var autoFormat = function () {
 
         var txt = DocumentManager.getCurrentDocument().getText();
         var editor = EditorManager.getCurrentFullEditor();
         var fileType = EditorUtils.getModeFromFileExtension(DocumentManager.getCurrentDocument().url);
+        //var fileType = editor.getModeForDocument()
         var cursor = editor.getCursorPos();
         var scroll = editor.getScrollPos();
 
-
         if (fileType === "javascript") {
+
             var formattedText = js_beautify(txt, {
-                indent_size: indent_size,
-                indent_char: indent_char,
+                indent_size: _indent_size,
+                indent_char: _indent_char,
                 reserve_newlines: true,
                 jslint_happy: true,
-                keep_array_indentation: true,
+                keep_array_indentation: false,
                 space_before_conditional: true
             });
         } else if (fileType === 'htmlmixed') {
 
             var formattedText = style_html(txt, {
-                indent_size: indent_size,
-                indent_char: indent_char
+                indent_size: _indent_size,
+                indent_char: _indent_char
             });
+
         } else if (fileType === 'css' || fileType === 'less') {
 
             var formattedText = css_beautify(txt, {
-                indent_size: indent_size,
-                indent_char: indent_char
+                indent_size: _indent_size,
+                indent_char: _indent_char
             });
 
         } else {
             alert('Could not determine file type');
         }
-
 
         DocumentManager.getCurrentDocument().setText(formattedText);
         var newCursorPos = editor.getCursorPos();
@@ -68,8 +75,9 @@ define(function (require, exports, module) {
     menu.addMenuItem(COMMAND_ID, [{
         key: "Ctrl-Shift-F",
         platform: "win"},
-                                                                                          {
+                                                                                                                  {
         key: "Ctrl-Shift-F",
-        platform: "mac"}]);
+        platform: "mac"}
+    ]);
 
 });
