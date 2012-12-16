@@ -1,7 +1,7 @@
 brackets-beautify-extension
 ============================
 
-If you install this extension, you can format `HTML`, `CSS`, and `JavaScript` files by "Edit > Beautify" menu or "Ctrl+Shift+F" key.
+Format `HTML`, `CSS`, and `JavaScript` files by "Edit > Beautify" menu or "Ctrl+Shift+F" key.
 
 Install
 ===
