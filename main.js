@@ -14,18 +14,18 @@ define(function (require, exports, module) {
 
     require('beautify');
     require('beautify-html');
-    require('beautify-css');
-
-    var _useTabs = Editor.getUseTabChar();
-    var _indent_size = Editor.getTabSize();
-
-    if (_useTabs) {
-        var _indent_char = '\t';
-    } else {
-        var _indent_char = ' ';
-    }
+    require('beautify-css'); 
 
     var autoFormat = function () {
+		
+	    var _useTabs = Editor.getUseTabChar();
+	    var _indent_size = Editor.getTabSize();
+
+	    if (_useTabs) {
+	        var _indent_char = '\t';
+	    } else {
+	        var _indent_char = ' ';
+	    }
 
         var txt = DocumentManager.getCurrentDocument().getText();
         var editor = EditorManager.getCurrentFullEditor();
