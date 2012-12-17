@@ -14,18 +14,22 @@ define(function (require, exports, module) {
 
     require('beautify');
     require('beautify-html');
-    require('beautify-css'); 
+    require('beautify-css');
 
-    var autoFormat = function () {
-		
-	    var _useTabs = Editor.getUseTabChar();
-	    var _indent_size = Editor.getTabSize();
+    function format() {
 
-	    if (_useTabs) {
-	        var _indent_char = '\t';
-	    } else {
-	        var _indent_char = ' ';
-	    }
+        var _useTabs = Editor.getUseTabChar();
+        var _indent_size = Editor.getTabSize();
+		var _indent_unit = Editor.getIndentUnit();
+	
+		var indent;
+        if (_useTabs) {
+            var _indent_char = '\t';
+			indent = _indent_size;
+        } else {
+            var _indent_char = ' ';
+			indent = _indent_unit;
+        }
 
         var txt = DocumentManager.getCurrentDocument().getText();
         var editor = EditorManager.getCurrentFullEditor();
@@ -37,7 +41,7 @@ define(function (require, exports, module) {
         if (fileType === "javascript") {
 
             var formattedText = js_beautify(txt, {
-                indent_size: _indent_size,
+                indent_size: indent,
                 indent_char: _indent_char,
                 reserve_newlines: true,
                 jslint_happy: true,
@@ -69,15 +73,15 @@ define(function (require, exports, module) {
         editor.setScrollPos(scroll.x, scroll.y);
     };
 
-    CommandManager.register("Beautify", COMMAND_ID, autoFormat);
+    CommandManager.register("Beautify", COMMAND_ID, format);
 
     var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
     menu.addMenuItem(COMMAND_ID, [{
         key: "Ctrl-Shift-F",
         platform: "win"},
-                                                                                                                  {
+                                                                                                                          {
         key: "Ctrl-Shift-F",
         platform: "mac"}
-    ]);
+            ]);
 
 });
