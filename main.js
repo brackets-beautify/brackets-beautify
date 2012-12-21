@@ -16,54 +16,103 @@ define(function (require, exports, module) {
     require('beautify-html');
     require('beautify-css');
 
+    /**
+     *
+     * @param {String} unformattedText
+     * @param {String} indentChar
+     * @param {String} indentSize
+     */
+
+    function _formatJavascript(unformattedText, indentChar, indentSize) {
+
+        var formattedText = js_beautify(unformattedText, {
+            indent_size: indentSize,
+            indent_char: indentChar,
+            reserve_newlines: true,
+            jslint_happy: true,
+            keep_array_indentation: false,
+            space_before_conditional: true
+        });
+
+        return formattedText;
+    }
+
+
+    /**
+     *
+     * @param {String} unformattedText
+     * @param {String} indentChar
+     * @param {String} indentSize
+     */
+
+    function _formatHTML(unformattedText, indentChar, indentSize) {
+
+        var formattedText = style_html(unformattedText, {
+            indent_size: indentSize,
+            indent_char: indentChar
+        });
+
+        return formattedText;
+    }
+
+    /**
+     *
+     * @param {String} unformattedText
+     * @param {String} indentChar
+     * @param {String} indentSize
+     */
+
+    function _formatCSS(unformattedText, indentChar, indentSize) {
+
+        var formattedText = css_beautify(unformattedText, {
+            indent_size: indentSize,
+            indent_char: indentChar
+        });
+
+        return formattedText;
+    }
+
+    /**
+     * Format
+     */
+
     function format() {
 
-        var _useTabs = Editor.getUseTabChar();
-        var _indent_size = Editor.getTabSize();
-		var _indent_unit = Editor.getIndentUnit();
-	
-		var indent;
-        if (_useTabs) {
-            var _indent_char = '\t';
-			indent = _indent_size;
+        var indentChar, formattedText;
+
+        var useTabs = Editor.getUseTabChar();
+        var indentSize = Editor.getTabSize();
+        var indentUnit = Editor.getIndentUnit();
+
+        if (useTabs) {
+            indentChar = '\t';
         } else {
-            var _indent_char = ' ';
-			indent = _indent_unit;
+            indentChar = ' ';
+            indentSize = indentUnit;
         }
 
-        var txt = DocumentManager.getCurrentDocument().getText();
+        var unformattedText = DocumentManager.getCurrentDocument().getText();
         var editor = EditorManager.getCurrentFullEditor();
-        var fileType = EditorUtils.getModeFromFileExtension(DocumentManager.getCurrentDocument().url);
-        //var fileType = editor.getModeForDocument()
+        var fileType = EditorUtils.getModeFromFileExtension(DocumentManager.getCurrentDocument().url); // -- var fileType = editor.getModeForDocument()
+       
         var cursor = editor.getCursorPos();
         var scroll = editor.getScrollPos();
 
         if (fileType === "javascript") {
 
-            var formattedText = js_beautify(txt, {
-                indent_size: indent,
-                indent_char: _indent_char,
-                reserve_newlines: true,
-                jslint_happy: true,
-                keep_array_indentation: false,
-                space_before_conditional: true
-            });
+            formattedText = _formatJavascript(unformattedText, indentChar, indentSize);
+
         } else if (fileType === 'htmlmixed') {
 
-            var formattedText = style_html(txt, {
-                indent_size: _indent_size,
-                indent_char: _indent_char
-            });
+            formattedText = _formatHTML(unformattedText, indentChar, indentSize);
 
         } else if (fileType === 'css' || fileType === 'less') {
 
-            var formattedText = css_beautify(txt, {
-                indent_size: _indent_size,
-                indent_char: _indent_char
-            });
+            formattedText = _formatCSS(unformattedText, indentChar, indentSize);
 
         } else {
             alert('Could not determine file type');
+            return;
         }
 
         DocumentManager.getCurrentDocument().setText(formattedText);
@@ -71,17 +120,25 @@ define(function (require, exports, module) {
 
         editor.setCursorPos(cursor);
         editor.setScrollPos(scroll.x, scroll.y);
-    };
+    }
 
     CommandManager.register("Beautify", COMMAND_ID, format);
 
     var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
-    menu.addMenuItem(COMMAND_ID, [{
-        key: "Ctrl-Shift-F",
-        platform: "win"},
-                                                                                                                          {
-        key: "Ctrl-Shift-F",
-        platform: "mac"}
-            ]);
 
+    var windowsCommand = {
+        key: "Ctrl-Shift-F",
+        platform: "win"
+    };
+
+    var macCommand = {
+        key: "Ctrl-Shift-F",
+        platform: "mac"
+    };
+
+    var command = [];
+    command.push(windowsCommand);
+    command.push(macCommand);
+
+    menu.addMenuItem(COMMAND_ID, command);
 });
