@@ -1,5 +1,5 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4, maxerr: 50 */
-/*global define, $, brackets, window */
+/*global define, $, brackets, window, js_beautify, style_html, css_beautify */
 
 define(function (require, exports, module) {
     "use strict";
@@ -78,23 +78,21 @@ define(function (require, exports, module) {
 
     function format() {
 
-        var indentChar, formattedText;
-
+        var indentChar, indentSize, formattedText;
         var useTabs = Editor.getUseTabChar();
-        var indentSize = Editor.getTabSize();
-        var indentUnit = Editor.getIndentUnit();
 
         if (useTabs) {
             indentChar = '\t';
+            indentSize = 1;
         } else {
             indentChar = ' ';
-            indentSize = indentUnit;
+            indentSize = Editor.getIndentUnit();
         }
 
         var unformattedText = DocumentManager.getCurrentDocument().getText();
         var editor = EditorManager.getCurrentFullEditor();
         var fileType = EditorUtils.getModeFromFileExtension(DocumentManager.getCurrentDocument().url); // -- var fileType = editor.getModeForDocument()
-       
+
         var cursor = editor.getCursorPos();
         var scroll = editor.getScrollPos();
 
