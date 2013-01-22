@@ -1,5 +1,5 @@
-/*jslint onevar: false, plusplus: false */
-/*jshint curly:true, eqeqeq:true, laxbreak:true, noempty:false */
+/* jslint onevar: false, plusplus: false */
+/* jshint curly:true, eqeqeq:true, laxbreak:true, noempty:false */
 /*
 
  JS Beautifier
