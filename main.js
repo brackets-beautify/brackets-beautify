@@ -17,17 +17,8 @@ define(function (require, exports, module) {
     require('beautify-html');
     require('beautify-css');
 
-    var xmlBeautify = require('xmlbeautify').formatXml;
 
     var settings = JSON.parse(require("text!settings.json"));
-
-
-    function _formatXml(unformattedText) {
-
-        var formattedText = xmlBeautify(unformattedText);
-
-        return formattedText;
-    }
 
 
     /**
@@ -136,10 +127,6 @@ define(function (require, exports, module) {
         } else if (fileType === 'css' || fileType === 'less') {
 
             formattedText = _formatCSS(unformattedText, indentChar, indentSize);
-
-        } else if (fileType === 'xml') {
-
-            formattedText = _formatXml(unformattedText);
 
         } else {
             alert('Could not determine file type');
