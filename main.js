@@ -52,7 +52,9 @@ define(function (require, exports, module) {
 
         var formattedText = style_html(unformattedText, {
             indent_size: indentSize,
-            indent_char: indentChar
+            indent_char: indentChar,
+			max_char : 0,
+			unformatted : []
         });
 
         return formattedText;
@@ -111,6 +113,8 @@ define(function (require, exports, module) {
 			
         var cursor = editor.getCursorPos();
         var scroll = editor.getScrollPos();
+		
+		console.log(fileType);
 
         if (typeof fileType === "object" && fileType.json === true) {
             fileType = "javascript";
@@ -120,7 +124,7 @@ define(function (require, exports, module) {
 
             formattedText = _formatJavascript(unformattedText, indentChar, indentSize);
 
-        } else if (fileType === 'htmlmixed') {
+        } else if (fileType === 'htmlmixed' || fileType === 'php') {
 
             formattedText = _formatHTML(unformattedText, indentChar, indentSize);
 
