@@ -9,14 +9,12 @@ define(function (require, exports, module) {
         EditorManager = brackets.getModule("editor/EditorManager"),
         Editor = brackets.getModule("editor/Editor").Editor,
         DocumentManager = brackets.getModule("document/DocumentManager"),
-        EditorUtils = brackets.getModule("editor/EditorUtils"),
         Menus = brackets.getModule("command/Menus"),
         COMMAND_ID = "me.drewh.jsbeautify";
 
     require('beautify');
     require('beautify-html');
     require('beautify-css');
-
 
     var settings = JSON.parse(require("text!settings.json"));
 
@@ -87,8 +85,6 @@ define(function (require, exports, module) {
         var unformattedText, isSelection = false;
         var useTabs = Editor.getUseTabChar();
 		
-		console.log(DocumentManager.getCurrentDocument());
-
         if (useTabs) {
             indentChar = '\t';
             indentSize = 1;
@@ -113,9 +109,7 @@ define(function (require, exports, module) {
 			
         var cursor = editor.getCursorPos();
         var scroll = editor.getScrollPos();
-		
-		console.log(fileType);
-
+	
         if (typeof fileType === "object" && fileType.json === true) {
             fileType = "javascript";
         }
@@ -139,7 +133,6 @@ define(function (require, exports, module) {
 
         var doc = DocumentManager.getCurrentDocument();
 
-
         doc.batchOperation(function () {
 
             if (isSelection) {
@@ -154,7 +147,6 @@ define(function (require, exports, module) {
             editor.setScrollPos(scroll.x, scroll.y);
         });
     }
-
 
     CommandManager.register("Beautify", COMMAND_ID, format);
     var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);

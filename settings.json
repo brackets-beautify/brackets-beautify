@@ -1,6 +1,6 @@
 {
 	"reserve_newlines": true,
 	"jslint_happy": true,
-	"keep_array_indentation": false,
+	"keep_array_indentation": true,
 	"space_before_conditional": true
 }
