@@ -1,6 +1,8 @@
 brackets-beautify-extension
 ============================
 
+Compatible with Sprint 21 only.
+
 Format `HTML`, `CSS`, and `JavaScript` files by "Edit > Beautify" menu or "Cmd-Alt-L(Mac) / Ctrl-Alt-L(Win)" key.
 
 Install

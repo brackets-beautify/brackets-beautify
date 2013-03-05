@@ -3,164 +3,169 @@
 
 define(function (require, exports, module) {
 
-    "use strict";
+	"use strict";
 
-    var CommandManager = brackets.getModule("command/CommandManager"),
-        EditorManager = brackets.getModule("editor/EditorManager"),
-        Editor = brackets.getModule("editor/Editor").Editor,
-        DocumentManager = brackets.getModule("document/DocumentManager"),
-        Menus = brackets.getModule("command/Menus"),
-        COMMAND_ID = "me.drewh.jsbeautify";
+	var CommandManager = brackets.getModule("command/CommandManager"),
+		EditorManager = brackets.getModule("editor/EditorManager"),
+		Editor = brackets.getModule("editor/Editor")
+			.Editor,
+		DocumentManager = brackets.getModule("document/DocumentManager"),
+		Menus = brackets.getModule("command/Menus"),
+		COMMAND_ID = "me.drewh.jsbeautify";
 
-    require('beautify');
-    require('beautify-html');
-    require('beautify-css');
+	require('beautify');
+	require('beautify-html');
+	require('beautify-css');
 
-    var settings = JSON.parse(require("text!settings.json"));
-
-
-    /**
-     *
-     * @param {String} unformattedText
-     * @param {String} indentChar
-     * @param {String} indentSize
-     */
-
-    function _formatJavascript(unformattedText, indentChar, indentSize) {
-
-        var options = {
-            indent_size: indentSize,
-            indent_char: indentChar
-        };
-
-        var formattedText = js_beautify(unformattedText, $.extend(options, settings));
-
-        return formattedText;
-    }
+	var settings = JSON.parse(require("text!settings.json"));
 
 
-    /**
-     *
-     * @param {String} unformattedText
-     * @param {String} indentChar
-     * @param {String} indentSize
-     */
+	/**
+	 *
+	 * @param {String} unformattedText
+	 * @param {String} indentChar
+	 * @param {String} indentSize
+	 */
 
-    function _formatHTML(unformattedText, indentChar, indentSize) {
+	function _formatJavascript(unformattedText, indentChar, indentSize) {
 
-        var formattedText = style_html(unformattedText, {
-            indent_size: indentSize,
-            indent_char: indentChar,
-			max_char : 0,
-			unformatted : []
-        });
+		var options = {
+			indent_size: indentSize,
+			indent_char: indentChar
+		};
 
-        return formattedText;
-    }
+		var formattedText = js_beautify(unformattedText, $.extend(options, settings));
 
-    /**
-     *
-     * @param {String} unformattedText
-     * @param {String} indentChar
-     * @param {String} indentSize
-     */
+		return formattedText;
+	}
 
-    function _formatCSS(unformattedText, indentChar, indentSize) {
 
-        var formattedText = css_beautify(unformattedText, {
-            indent_size: indentSize,
-            indent_char: indentChar
-        });
+	/**
+	 *
+	 * @param {String} unformattedText
+	 * @param {String} indentChar
+	 * @param {String} indentSize
+	 */
 
-        return formattedText;
-    }
+	function _formatHTML(unformattedText, indentChar, indentSize) {
 
-    /**
-     * Format
-     */
+		var formattedText = style_html(unformattedText, {
+			indent_size: indentSize,
+			indent_char: indentChar,
+			max_char: 0,
+			unformatted: []
+		});
 
-    function format() {
+		return formattedText;
+	}
 
-        var indentChar, indentSize, formattedText;
-        var unformattedText, isSelection = false;
-        var useTabs = Editor.getUseTabChar();
-		
-        if (useTabs) {
-            indentChar = '\t';
-            indentSize = 1;
-        } else {
-            indentChar = ' ';
-            indentSize = Editor.getIndentUnit();
-        }
+	/**
+	 *
+	 * @param {String} unformattedText
+	 * @param {String} indentChar
+	 * @param {String} indentSize
+	 */
 
-        var editor = EditorManager.getCurrentFullEditor();
-        var selectedText = editor.getSelectedText();
+	function _formatCSS(unformattedText, indentChar, indentSize) {
 
-        var selection = editor.getSelection();
+		var formattedText = css_beautify(unformattedText, {
+			indent_size: indentSize,
+			indent_char: indentChar
+		});
 
-        if (selectedText.length > 0) {
-            isSelection = true;
-            unformattedText = selectedText;
-        } else {
-            unformattedText = DocumentManager.getCurrentDocument().getText();
-        }		  
-		
-		var fileType = editor.getModeForDocument();
-			
-        var cursor = editor.getCursorPos();
-        var scroll = editor.getScrollPos();
-	
-        if (typeof fileType === "object" && fileType.json === true) {
-            fileType = "javascript";
-        }
+		return formattedText;
+	}
 
-        if (fileType === "javascript") {
+	/**
+	 * Format
+	 */
 
-            formattedText = _formatJavascript(unformattedText, indentChar, indentSize);
+	function format() {
 
-        } else if (fileType === 'htmlmixed' || fileType === 'php') {
+		var indentChar, indentSize, formattedText;
+		var unformattedText, isSelection = false;
+		var useTabs = Editor.getUseTabChar();
 
-            formattedText = _formatHTML(unformattedText, indentChar, indentSize);
+		if (useTabs) {
+			indentChar = '\t';
+			indentSize = 1;
+		} else {
+			indentChar = ' ';
+			indentSize = Editor.getIndentUnit();
+		}
 
-        } else if (fileType === 'css' || fileType === 'less') {
+		var editor = EditorManager.getCurrentFullEditor();
+		var selectedText = editor.getSelectedText();
 
-            formattedText = _formatCSS(unformattedText, indentChar, indentSize);
+		var selection = editor.getSelection();
 
-        } else {
-            alert('Could not determine file type');
-            return;
-        }
+		if (selectedText.length > 0) {
+			isSelection = true;
+			unformattedText = selectedText;
+		} else {
+			unformattedText = DocumentManager.getCurrentDocument().getText();
+		}
 
-        var doc = DocumentManager.getCurrentDocument();
+		var cursor = editor.getCursorPos();
+		var scroll = editor.getScrollPos();
+		var doc = DocumentManager.getCurrentDocument();
 
-        doc.batchOperation(function () {
+		var language = doc.getLanguage();
+		var fileType = language._id;
 
-            if (isSelection) {
-                doc.replaceRange(formattedText, selection.start, selection.end);
-            } else {
-                doc.setText(formattedText);
-            }
+		if (fileType) {
 
-            //			var newCursorPos = editor.getCursorPos();
+			if (fileType === 'javascript' || fileType === 'json') {
 
-            editor.setCursorPos(cursor);
-            editor.setScrollPos(scroll.x, scroll.y);
-        });
-    }
+				formattedText = _formatJavascript(unformattedText, indentChar, indentSize);
 
-    CommandManager.register("Beautify", COMMAND_ID, format);
-    var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
+			} else if (fileType === 'html' || fileType === 'php') {
 
-    var windowsCommand = {
-        key: "Ctrl-Alt-L",
-        platform: "win"
-    };
+				formattedText = _formatHTML(unformattedText, indentChar, indentSize);
 
-    var macCommand = {
-        key: "Cmd-Alt-L",
-        platform: "mac"
-    };
+			} else if (fileType === 'css' || fileType === 'less') {
 
-    var command = [windowsCommand, macCommand];
-    menu.addMenuItem(COMMAND_ID, command);
+				formattedText = _formatCSS(unformattedText, indentChar, indentSize);
+
+			} else {
+				alert('Could not determine file type');
+				return;
+			}
+
+		} else {
+
+			alert('Could not determine file type');
+			return;
+		}
+
+		doc.batchOperation(function () {
+
+			if (isSelection) {
+				doc.replaceRange(formattedText, selection.start, selection.end);
+			} else {
+				doc.setText(formattedText);
+			}
+
+			//			var newCursorPos = editor.getCursorPos();
+
+			editor.setCursorPos(cursor);
+			editor.setScrollPos(scroll.x, scroll.y);
+		});
+	}
+
+	CommandManager.register("Beautify", COMMAND_ID, format);
+	var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
+
+	var windowsCommand = {
+		key: "Ctrl-Alt-L",
+		platform: "win"
+	};
+
+	var macCommand = {
+		key: "Cmd-Alt-L",
+		platform: "mac"
+	};
+
+	var command = [windowsCommand, macCommand];
+	menu.addMenuItem(COMMAND_ID, command);
 });
