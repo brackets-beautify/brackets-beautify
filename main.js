@@ -13,7 +13,7 @@ define(function (require, exports, module) {
 		Menus = brackets.getModule("command/Menus"),
 		COMMAND_ID = "me.drewh.jsbeautify";
 
-	require('beautify');
+	var js_beautify = require('beautify').js_beautify;
 	require('beautify-html');
 	require('beautify-css');
 
@@ -91,7 +91,7 @@ define(function (require, exports, module) {
 			indentSize = 1;
 		} else {
 			indentChar = ' ';
-			indentSize = Editor.getIndentUnit();
+			indentSize = Editor.getSpaceUnits();
 		}
 
 		var editor = EditorManager.getCurrentFullEditor();
