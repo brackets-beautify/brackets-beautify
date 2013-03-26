@@ -1,7 +1,7 @@
 brackets-beautify-extension
 ============================
 
-Compatible with Sprint 22
+Compatible with Sprint 22 ONLY
 
 Format `HTML`, `CSS`, and `JavaScript` files by "Edit > Beautify" menu or "Cmd-Alt-L(Mac) / Ctrl-Alt-L(Win)" key.
 
