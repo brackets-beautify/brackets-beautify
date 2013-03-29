@@ -3,14 +3,14 @@ brackets-beautify-extension
 
 Compatible with Sprint 22 ONLY
 
-Format `HTML`, `CSS`, and `JavaScript` files by "Edit > Beautify" menu or "Cmd-Alt-L(Mac) / Ctrl-Alt-L(Win)" key.
+Format `HTML`, `CSS`, and `JavaScript` files by `Edit > Beautify` menu or `Cmd-Alt-L(Mac) / Ctrl-Alt-L(Win)` key.
 
 Install Easy
 ===
 
 `File > Install Extension`
 
-Paste https://github.com/drewhjava/brackets-beautify.git into Extension URL field
+Paste https://github.com/drewhjava/brackets-beautify into Extension URL field
 
 
 Alternative Install
