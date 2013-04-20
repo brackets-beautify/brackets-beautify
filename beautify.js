@@ -1,6 +1,30 @@
 /*jshint curly:true, eqeqeq:true, laxbreak:true, noempty:false */
 /*
 
+  The MIT License (MIT)
+
+  Copyright (c) 2007-2013 Einar Lielmanis and contributors.
+
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation files
+  (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge,
+  publish, distribute, sublicense, and/or sell copies of the Software,
+  and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+  ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+
  JS Beautifier
 ---------------
 
@@ -10,8 +34,8 @@
 
   Originally converted to javascript by Vital, <vital76@gmail.com>
   "End braces on own line" added by Chris J. Shull, <chrisjshull@gmail.com>
+  Parsing improvements for brace-less statements by Liam Newman <bitwiseman@gmail.com>
 
-  You are free to use this in any way you want, in case you find this useful or working for you.
 
   Usage:
     js_beautify(js_source_text);
@@ -29,17 +53,8 @@
             ---------------------------------
              function ()      function()
 
-    brace_style (default "collapse") - "collapse" | "expand" | "end-expand" | "expand-strict"
+    brace_style (default "collapse") - "collapse" | "expand" | "end-expand"
             put braces on the same line as control statements (default), or put braces on own line (Allman / ANSI style), or just put end braces on own line.
-
-            expand-strict: put brace on own line even in such cases:
-
-                var a =
-                {
-                    a: 5,
-                    b: 6
-                }
-            This mode may break your scripts - e.g "return { a: 1 }" will be broken into two lines, so beware.
 
     space_before_conditional (default true) - should the space before conditional statement be added, "if(true)" vs "if (true)",
 
@@ -149,6 +164,12 @@
             opt.brace_style = options.braces_on_own_line ? "expand" : "collapse";
         }
         opt.brace_style = options.brace_style ? options.brace_style : (opt.brace_style ? opt.brace_style : "collapse");
+
+        // graceful handling of deprecated option
+        if (opt.brace_style === "expand-strict") {
+            opt.brace_style = "expand";
+        }
+
 
         opt.indent_size = options.indent_size ? parseInt(options.indent_size, 10) : 4;
         opt.indent_char = options.indent_char ? options.indent_char : ' ';
@@ -424,7 +445,6 @@
 
         function restore_mode() {
             if (flag_store.length > 0) {
-                var mode = flags.mode;
                 previous_flags = flags;
                 flags = flag_store.pop();
             }
@@ -932,19 +952,17 @@
             set_mode(MODE.BlockStatement);
 
             var empty_braces = is_next('}');
+            var empty_anonymous_function = empty_braces && flags.last_word === 'function' &&
+                last_type === 'TK_END_EXPR';
 
-            if (opt.brace_style === "expand-strict") {
-                if (!empty_braces) {
-                    print_newline();
-                }
-            } else if (opt.brace_style === "expand") {
-                if (last_type !== 'TK_OPERATOR') {
-                    if (last_type === 'TK_EQUALS' ||
-                        (is_special_word (flags.last_text) && flags.last_text !== 'else')) {
+            if (opt.brace_style === "expand") {
+                if (last_type !== 'TK_OPERATOR' &&
+                    (empty_anonymous_function ||
+                        last_type === 'TK_EQUALS' ||
+                        (is_special_word (flags.last_text) && flags.last_text !== 'else'))) {
                         output_space_before_token = true;
-                    } else {
-                        print_newline();
-                    }
+                } else {
+                    print_newline();
                 }
             } else { // collapse
                 if (last_type !== 'TK_OPERATOR' && last_type !== 'TK_START_EXPR') {
@@ -975,13 +993,15 @@
                 restore_mode();
             }
             restore_mode();
-            if (opt.brace_style === "expand" || opt.brace_style === "expand-strict") {
-                if  (last_type !== 'TK_START_BLOCK') {
+            var empty_braces = last_type === 'TK_START_BLOCK';
+
+            if (opt.brace_style === "expand") {
+                if  (!empty_braces) {
                     print_newline();
                 }
             } else {
                 // skip {}
-                if (last_type !== 'TK_START_BLOCK') {
+                if (!empty_braces) {
                     if (is_array(flags.mode) && opt.keep_array_indentation) {
                         // we REALLY need a newline here, but newliner would skip that
                         opt.keep_array_indentation = false;
@@ -1073,7 +1093,7 @@
 
             if (token_text === 'case' || (token_text === 'default' && flags.in_case_statement)) {
                 print_newline();
-                if (flags.case_body) {
+                if (flags.case_body || opt.jslint_happy) {
                     // switch cases following one another
                     flags.indentation_level--;
                     flags.case_body = false;
@@ -1090,7 +1110,7 @@
                 if (!in_array(token_text, ['else', 'catch', 'finally'])) {
                     prefix = 'NEWLINE';
                 } else {
-                    if (opt.brace_style === "expand" || opt.brace_style === "end-expand" || opt.brace_style === "expand-strict") {
+                    if (opt.brace_style === "expand" || opt.brace_style === "end-expand") {
                         prefix = 'NEWLINE';
                     } else {
                         prefix = 'SPACE';
@@ -1129,10 +1149,15 @@
             }
 
             if (in_array(token_text, ['else', 'catch', 'finally'])) {
-                if (last_type !== 'TK_END_BLOCK' || opt.brace_style === "expand" || opt.brace_style === "end-expand" || opt.brace_style === "expand-strict") {
+                if (last_type !== 'TK_END_BLOCK' || opt.brace_style === "expand" || opt.brace_style === "end-expand") {
                     print_newline();
                 } else {
                     trim_output(true);
+                    // If we trimmed and there's something other than a close block before us
+                    // put a newline back in.  Handles '} // comment' scenario.
+                    if (output[output.length - 1] !== '}') {
+                        print_newline();
+                    }
                     output_space_before_token = true;
                 }
             } else if (prefix === 'NEWLINE') {

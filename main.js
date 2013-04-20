@@ -13,11 +13,10 @@ define(function (require, exports, module) {
         COMMAND_ID = "me.drewh.jsbeautify";
 
     var js_beautify = require('beautify').js_beautify;
-    require('beautify-html');
-    require('beautify-css');
+    var css_beautify = require('beautify-css').css_beautify;
+    var html_beautify = require('beautify-html').html_beautify;
 
     var settings = JSON.parse(require("text!settings.json"));
-
 
     /**
      *
@@ -48,7 +47,7 @@ define(function (require, exports, module) {
 
     function _formatHTML(unformattedText, indentChar, indentSize) {
 
-        var formattedText = style_html(unformattedText, {
+        var formattedText = html_beautify(unformattedText, {
             indent_size: indentSize,
             indent_char: indentChar,
             max_char: 0,
@@ -57,7 +56,7 @@ define(function (require, exports, module) {
 
         return formattedText;
     }
-
+    
     /**
      *
      * @param {String} unformattedText
@@ -129,11 +128,12 @@ define(function (require, exports, module) {
         case 'less':
             formattedText = _formatCSS(unformattedText, indentChar, indentSize);
             break;
+
         default:
             alert('Could not determine file type');
             return;
         }
-       
+
         doc.batchOperation(function () {
 
             if (isSelection) {
@@ -141,8 +141,6 @@ define(function (require, exports, module) {
             } else {
                 doc.setText(formattedText);
             }
-
-            //			var newCursorPos = editor.getCursorPos();
 
             editor.setCursorPos(cursor);
             editor.setScrollPos(scroll.x, scroll.y);
