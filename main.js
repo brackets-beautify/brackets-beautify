@@ -56,7 +56,7 @@ define(function (require, exports, module) {
 
         return formattedText;
     }
-    
+
     /**
      *
      * @param {String} unformattedText
@@ -135,6 +135,10 @@ define(function (require, exports, module) {
         }
 
         doc.batchOperation(function () {
+
+            if (settings.git_happy) {
+                formattedText += '\n';
+            }
 
             if (isSelection) {
                 doc.replaceRange(formattedText, selection.start, selection.end);

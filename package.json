@@ -1,0 +1,29 @@
+{
+    "name": "brackets-beautify",
+    "title": "Beautify",
+    "version": "0.0.4",
+    "description": "Format JavaScript, HTML, and CSS files",
+    "homepage": "https://github.com/drewhjava/brackets-beautify",
+    "author": "Drew Hamlett i@drewh.me (https://github.com/drewhjava/)",
+    "license": "MIT",
+    "categories":"formatting",
+    "keywords": [
+        "format",
+        "formatting",
+        "beautify",
+        "jsbeautify",
+        "javascript formatting",
+        "html formatting",
+        "css formatting"
+    ],
+    "files": [
+        "main.js",
+        "settings.json",
+        "beautify.js",
+        "beautify-html.js",
+        "beautify-css.js"
+    ],
+    "engines": {
+        "brackets": ">=0.22.0"
+    }
+}
