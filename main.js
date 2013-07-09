@@ -155,12 +155,12 @@ define(function (require, exports, module) {
     var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
 
     var windowsCommand = {
-        key: "Ctrl-Alt-L",
+        key: "Ctrl-Alt-Space",
         platform: "win"
     };
 
     var macCommand = {
-        key: "Cmd-Alt-L",
+        key: "Cmd-Alt-Space",
         platform: "mac"
     };
 
