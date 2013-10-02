@@ -127,6 +127,7 @@ define(function (require, exports, module) {
 
         case 'css':
         case 'less':
+        case 'scss':
             formattedText = _formatCSS(unformattedText, indentChar, indentSize);
             break;
 
