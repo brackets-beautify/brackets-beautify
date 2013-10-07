@@ -122,6 +122,7 @@ define(function (require, exports, module) {
         case 'php':
         case 'xml':
         case 'ejs':
+        case 'erb':
             formattedText = _formatHTML(unformattedText, indentChar, indentSize);
             break;
 
