@@ -6,10 +6,12 @@ define(function (require, exports, module) {
     "use strict";
 
     var CommandManager = brackets.getModule("command/CommandManager"),
+        Commands = brackets.getModule('command/Commands'),
         EditorManager = brackets.getModule("editor/EditorManager"),
         Editor = brackets.getModule("editor/Editor").Editor,
         DocumentManager = brackets.getModule("document/DocumentManager"),
         Menus = brackets.getModule("command/Menus"),
+        COMMAND_SAVE_ID = "me.dpalmero.jsbeautify",
         COMMAND_ID = "me.drewh.jsbeautify";
 
     var js_beautify = require('beautify').js_beautify;
@@ -153,7 +155,32 @@ define(function (require, exports, module) {
         });
     }
 
+
+    $(DocumentManager).on("documentSaved", function (event, doc) {
+        if (localStorage.getItem("me.dpalmero.jsbeautify") == "true") {
+            if ((event.timeStamp - localStorage.getItem("me.dpalmero.jsbeautify.timeStamp")) > 1000) {
+                format();
+                localStorage.setItem("me.dpalmero.jsbeautify.timeStamp", event.timeStamp);
+                CommandManager.execute(Commands.FILE_SAVE, {
+                    doc: doc
+                });
+            }
+        }
+    });
+
     CommandManager.register("Beautify", COMMAND_ID, format);
+    CommandManager.register("Beautify on Save", COMMAND_SAVE_ID, function () {
+        this.setChecked(!this.getChecked());
+        localStorage.setItem("me.dpalmero.jsbeautify", this.getChecked());
+        if (this.getChecked()) {
+            localStorage.setItem("me.dpalmero.jsbeautify.timeStamp", 0);
+        }
+    });
+
+    var automaton = CommandManager.get(COMMAND_SAVE_ID);
+    automaton.setChecked(localStorage.getItem("me.dpalmero.jsbeautify"));
+    localStorage.setItem("me.dpalmero.jsbeautify", true);
+
     var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
 
     var windowsCommand = {
@@ -167,5 +194,8 @@ define(function (require, exports, module) {
     };
 
     var command = [windowsCommand, macCommand];
+    menu.addMenuDivider();
     menu.addMenuItem(COMMAND_ID, command);
+    menu.addMenuItem(automaton);
+
 });
