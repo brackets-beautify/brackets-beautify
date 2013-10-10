@@ -1,5 +1,5 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4 */
-/*global define, $, brackets, window, js_beautify, style_html, css_beautify */
+/*global define, $, brackets, window, js_beautify, style_html, css_beautify, localStorage */
 
 define(function (require, exports, module) {
 
@@ -10,8 +10,10 @@ define(function (require, exports, module) {
         EditorManager = brackets.getModule("editor/EditorManager"),
         Editor = brackets.getModule("editor/Editor").Editor,
         DocumentManager = brackets.getModule("document/DocumentManager"),
+        PreferencesManager = brackets.getModule('preferences/PreferencesManager'),
         Menus = brackets.getModule("command/Menus"),
-        COMMAND_SAVE_ID = "me.dpalmero.jsbeautify",
+        COMMAND_TIMESTAMP = "me.drewh.jsbeautify.timeStamp",
+        COMMAND_SAVE_ID = "me.drewh.jsbeautify-autosave",
         COMMAND_ID = "me.drewh.jsbeautify";
 
     var js_beautify = require('beautify').js_beautify;
@@ -80,7 +82,7 @@ define(function (require, exports, module) {
      * Format
      */
 
-    function format() {
+    function format(autoSave) {
 
         var indentChar, indentSize, formattedText;
         var unformattedText, isSelection = false;
@@ -134,7 +136,7 @@ define(function (require, exports, module) {
             break;
 
         default:
-            alert('Could not determine file type');
+            if (!autoSave) alert('Could not determine file type');
             return;
         }
 
@@ -155,31 +157,33 @@ define(function (require, exports, module) {
         });
     }
 
-
-    $(DocumentManager).on("documentSaved", function (event, doc) {
-        if (localStorage.getItem("me.dpalmero.jsbeautify") == "true") {
-            if ((event.timeStamp - localStorage.getItem("me.dpalmero.jsbeautify.timeStamp")) > 1000) {
-                format();
-                localStorage.setItem("me.dpalmero.jsbeautify.timeStamp", event.timeStamp);
-                CommandManager.execute(Commands.FILE_SAVE, {
-                    doc: doc
-                });
-            }
+    function onSave(event, doc) {
+        if ((event.timeStamp - localStorage.getItem(COMMAND_TIMESTAMP)) > 1000) {
+            format(true);
+            localStorage.setItem(COMMAND_TIMESTAMP, event.timeStamp);
+            CommandManager.execute(Commands.FILE_SAVE, {
+                doc: doc
+            });
         }
+    }
+
+    function toggle(command, fromCheckbox) {
+        var newValue = (typeof fromCheckbox === "undefined") ? enabled : fromCheckbox;
+        $(DocumentManager)[newValue ? 'on' : 'off']('documentSaved', onSave);
+        preferences.setValue('enabled', newValue);
+        command.setChecked(newValue);
+    }
+
+    var preferences = PreferencesManager.getPreferenceStorage(COMMAND_SAVE_ID, {
+        enabled: false
     });
+    var enabled = preferences.getValue('enabled');
 
     CommandManager.register("Beautify", COMMAND_ID, format);
-    CommandManager.register("Beautify on Save", COMMAND_SAVE_ID, function () {
-        this.setChecked(!this.getChecked());
-        localStorage.setItem("me.dpalmero.jsbeautify", this.getChecked());
-        if (this.getChecked()) {
-            localStorage.setItem("me.dpalmero.jsbeautify.timeStamp", 0);
-        }
+    var commandOnSave = CommandManager.register("Beautify on Save", COMMAND_SAVE_ID, function () {
+        toggle(this, !this.getChecked());
+        if (this.getChecked()) localStorage.setItem(COMMAND_TIMESTAMP, 0);
     });
-
-    var automaton = CommandManager.get(COMMAND_SAVE_ID);
-    automaton.setChecked(localStorage.getItem("me.dpalmero.jsbeautify"));
-    localStorage.setItem("me.dpalmero.jsbeautify", true);
 
     var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
 
@@ -187,15 +191,17 @@ define(function (require, exports, module) {
         key: "Ctrl-Alt-L",
         platform: "win"
     };
-
     var macCommand = {
         key: "Cmd-Alt-L",
         platform: "mac"
     };
 
     var command = [windowsCommand, macCommand];
+
+    toggle(commandOnSave);
+
     menu.addMenuDivider();
     menu.addMenuItem(COMMAND_ID, command);
-    menu.addMenuItem(automaton);
+    menu.addMenuItem(COMMAND_SAVE_ID);
 
 });
