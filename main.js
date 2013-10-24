@@ -12,7 +12,7 @@ define(function (require, exports, module) {
         Menus = brackets.getModule("command/Menus"),
         COMMAND_ID = "me.drewh.jsbeautify";
 
-    var js_beautify = require('beautify').js_beautify;
+    var js_beautify = require('beautify');
     var css_beautify = require('beautify-css').css_beautify;
     var html_beautify = require('beautify-html').html_beautify;
 
