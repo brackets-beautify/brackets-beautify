@@ -227,7 +227,7 @@
             } else if (ch === ":") {
                 eatWhitespace();
 
-                var pseudoClasses = ['hover','before','after','active','visited','link','first-','focus','first-','lang','nth-ch'],
+                var pseudoClasses = ['hover','before','after','active','visited','link','first-','focus','first-','lang','nth-ch','not'],
                     pseudoClassesLength = pseudoClasses.length,
                     found = 0;
                 while(pseudoClassesLength--) {
