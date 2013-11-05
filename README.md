@@ -5,6 +5,13 @@ Compatible with Sprint 22 and above
 
 Format `HTML`, `CSS`, and `JavaScript` files by `Edit > Beautify` menu or `Cmd-Alt-L(Mac) / Ctrl-Alt-L(Win)` key.
 
+Note
+===
+
+For any pull requesets dealing with beautify-css.js, beautify.js and beautify-html.js, please send to 
+
+https://github.com/einars/js-beautify
+
 Install Easy
 ===
 
