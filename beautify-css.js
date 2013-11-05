@@ -143,7 +143,7 @@
         }
 
         // printer
-        var indentString = source_text.match(/^[\r\n]*[\t ]*/)[0];
+        var indentString = source_text.trim().match(/^[\r\n]*[\t ]*/)[0];
         var singleIndent = Array(indentSize + 1).join(indentCharacter);
         var indentLevel = 0;
 
