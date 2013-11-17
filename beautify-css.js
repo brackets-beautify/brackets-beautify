@@ -90,6 +90,10 @@
             return source_text.charAt(pos + 1);
         }
 
+        function bigpeek() {
+            return source_text.charAt(pos + 1) + source_text.charAt(pos + 2) + source_text.charAt(pos + 3) + source_text.charAt(pos + 4) + source_text.charAt(pos + 5) + source_text.charAt(pos + 6);
+        }
+
         function eatString(endChar) {
             var start = pos;
             while (next()) {
@@ -139,7 +143,7 @@
         }
 
         // printer
-        var indentString = source_text.match(/^[\r\n]*[\t ]*/)[0];
+        var indentString = source_text.trim().match(/^[\r\n]*[\t ]*/)[0];
         var singleIndent = Array(indentSize + 1).join(indentCharacter);
         var indentLevel = 0;
 
@@ -222,7 +226,22 @@
                 insideRule = false;
             } else if (ch === ":") {
                 eatWhitespace();
-                output.push(ch, " ");
+
+                var pseudoClasses = ['hover','before','after','active','visited','link','first-','focus','first-','lang','nth-ch','not'],
+                    pseudoClassesLength = pseudoClasses.length,
+                    found = 0;
+                while(pseudoClassesLength--) {
+                   if (bigpeek().indexOf(pseudoClasses[pseudoClassesLength])!=-1) {
+                       found = 1;
+                   }
+                }
+
+                if(found === 0) {
+                    output.push(ch, " ");
+                } else {
+                    output.push(ch);
+                }
+
                 insideRule = true;
             } else if (ch === '"' || ch === '\'') {
                 output.push(eatString(ch));
