@@ -64,8 +64,9 @@
         var indentSize = options.indent_size || 4;
         var indentCharacter = options.indent_char || ' ';
         var selectorSeparatorNewline = true;
-        if (options.selector_separator_newline != undefined)
+        if (options.selector_separator_newline !== undefined) {
             selectorSeparatorNewline = options.selector_separator_newline;
+        }
         var endWithNewline = options.end_with_newline || false;
 
         // compatibility
@@ -88,10 +89,6 @@
 
         function peek() {
             return source_text.charAt(pos + 1);
-        }
-
-        function bigpeek() {
-            return source_text.charAt(pos + 1) + source_text.charAt(pos + 2) + source_text.charAt(pos + 3) + source_text.charAt(pos + 4) + source_text.charAt(pos + 5) + source_text.charAt(pos + 6);
         }
 
         function eatString(endChar) {
@@ -123,12 +120,14 @@
             return pos !== start + 1;
         }
 
-        function eatComment() {
+        function eatComment(singleLine) {
             var start = pos;
             next();
             while (next()) {
                 if (ch === "*" && peek() === "/") {
                     pos++;
+                    break;
+                } else if (singleLine && ch === "\n") {
                     break;
                 }
             }
@@ -142,10 +141,20 @@
                 str;
         }
 
+        function isCommentOnLine() {
+            var endOfLine = source_text.indexOf('\n', pos);
+            if (endOfLine === -1) {
+                return false;
+            }
+            var restOfLine = source_text.substring(pos, endOfLine);
+            return restOfLine.indexOf('//') !== -1;
+        }
+
         // printer
-        var indentString = source_text.trim().match(/^[\r\n]*[\t ]*/)[0];
-        var singleIndent = Array(indentSize + 1).join(indentCharacter);
+        var indentString = source_text.match(/^[\r\n]*[\t ]*/)[0];
+        var singleIndent = new Array(indentSize + 1).join(indentCharacter);
         var indentLevel = 0;
+        var nestedLevel = 0;
 
         function indent() {
             indentLevel++;
@@ -171,7 +180,7 @@
 
         print._lastCharWhitespace = function () {
             return whiteRe.test(output[output.length - 1]);
-        }
+        };
 
         print.newLine = function (keepWhitespace) {
             if (!keepWhitespace) {
@@ -199,54 +208,86 @@
         /*_____________________--------------------_____________________*/
 
         var insideRule = false;
+        var enteringConditionalGroup = false;
+
         while (true) {
             var isAfterSpace = skipWhitespace();
 
             if (!ch) {
                 break;
-            } else if (ch === '/' && peek() === '*') { // comment
+            } else if (ch === '/' && peek() === '*') { /* css comment */
                 print.newLine();
                 output.push(eatComment(), "\n", indentString);
-                var header = lookBack("")
+                var header = lookBack("");
                 if (header) {
                     print.newLine();
                 }
+            } else if (ch === '/' && peek() === '/') { // single line comment
+                output.push(eatComment(true), indentString);
+            } else if (ch === '@') {
+                // strip trailing space, if present, for hash property checks
+                var atRule = eatString(" ").replace(/ $/, '');
+
+                // pass along the space we found as a separate item
+                output.push(atRule, ch);
+
+                // might be a nesting at-rule
+                if (atRule in css_beautify.NESTED_AT_RULE) {
+                    nestedLevel += 1;
+                    if (atRule in css_beautify.CONDITIONAL_GROUP_RULE) {
+                        enteringConditionalGroup = true;
+                    }
+                }
             } else if (ch === '{') {
                 eatWhitespace();
-                if (peek() == '}') {
+                if (peek() === '}') {
                     next();
                     output.push(" {}");
                 } else {
                     indent();
                     print["{"](ch);
+                    // when entering conditional groups, only rulesets are allowed
+                    if (enteringConditionalGroup) {
+                        enteringConditionalGroup = false;
+                        insideRule = (indentLevel > nestedLevel);
+                    } else {
+                        // otherwise, declarations are also allowed
+                        insideRule = (indentLevel >= nestedLevel);
+                    }
                 }
             } else if (ch === '}') {
                 outdent();
                 print["}"](ch);
                 insideRule = false;
+                if (nestedLevel) {
+                    nestedLevel--;
+                }
             } else if (ch === ":") {
                 eatWhitespace();
-
-                var pseudoClasses = ['hover','before','after','active','visited','link','first-','focus','first-','lang','nth-ch','not'],
-                    pseudoClassesLength = pseudoClasses.length,
-                    found = 0;
-                while(pseudoClassesLength--) {
-                   if (bigpeek().indexOf(pseudoClasses[pseudoClassesLength])!=-1) {
-                       found = 1;
-                   }
-                }
-
-                if(found === 0) {
+                if (insideRule || enteringConditionalGroup) {
+                    // 'property: value' delimiter
+                    // which could be in a conditional group query
                     output.push(ch, " ");
                 } else {
-                    output.push(ch);
+                    if (peek() === ":") {
+                        // pseudo-element
+                        next();
+                        output.push("::");
+                    } else {
+                        // pseudo-class
+                        output.push(ch);
+                    }
                 }
-
-                insideRule = true;
             } else if (ch === '"' || ch === '\'') {
                 output.push(eatString(ch));
             } else if (ch === ';') {
-                output.push(ch, '\n', indentString);
+                if (isCommentOnLine()) {
+                    var beforeComment = eatString('/');
+                    var comment = eatComment(true);
+                    output.push(beforeComment, comment.substring(1, comment.length - 1), '\n', indentString);
+                } else {
+                    output.push(ch, '\n', indentString);
+                }
             } else if (ch === '(') { // may be a url
                 if (lookBack("url")) {
                     output.push(ch);
@@ -294,15 +335,33 @@
 
         // establish end_with_newline
         var should = endWithNewline;
-        var actually = /\n$/.test(sweetCode)
-        if (should && !actually)
+        var actually = /\n$/.test(sweetCode);
+        if (should && !actually) {
             sweetCode += "\n";
-        else if (!should && actually)
+        } else if (!should && actually) {
             sweetCode = sweetCode.slice(0, -1);
+        }
 
         return sweetCode;
     }
 
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/At-rule
+    css_beautify.NESTED_AT_RULE = {
+        "@page": true,
+        "@font-face": true,
+        "@keyframes": true,
+        // also in CONDITIONAL_GROUP_RULE below
+        "@media": true,
+        "@supports": true,
+        "@document": true
+    };
+    css_beautify.CONDITIONAL_GROUP_RULE = {
+        "@media": true,
+        "@supports": true,
+        "@document": true
+    };
+
+    /*global define */
     if (typeof define === "function") {
         // Add support for require.js
         define(function (require, exports, module) {
