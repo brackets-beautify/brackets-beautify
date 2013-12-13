@@ -10,7 +10,8 @@ define(function (require, exports, module) {
         Editor = brackets.getModule("editor/Editor").Editor,
         DocumentManager = brackets.getModule("document/DocumentManager"),
         Menus = brackets.getModule("command/Menus"),
-        COMMAND_ID = "me.drewh.jsbeautify";
+        COMMAND_ID = "me.drewh.jsbeautify",
+        CONTEXTUAL_COMMAND_ID = "me.drewh.jsbeautifyContextual";
 
     var js_beautify = require('beautify');
     var css_beautify = require('beautify-css').css_beautify;
@@ -153,6 +154,10 @@ define(function (require, exports, module) {
         });
     }
 
+    /**
+     * File menu
+     */
+
     CommandManager.register("Beautify", COMMAND_ID, format);
     var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
 
@@ -168,4 +173,12 @@ define(function (require, exports, module) {
 
     var command = [windowsCommand, macCommand];
     menu.addMenuItem(COMMAND_ID, command);
+
+    /**
+     * Contextual menu
+     */
+     
+    CommandManager.register("Beautify", CONTEXTUAL_COMMAND_ID, format);
+    var contextMenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU);
+    contextMenu.addMenuItem(CONTEXTUAL_COMMAND_ID);  
 });
