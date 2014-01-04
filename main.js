@@ -1,15 +1,19 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4 */
-/*global define, $, brackets, window, js_beautify, style_html, css_beautify */
+/*global define, $, brackets, window, js_beautify, style_html, css_beautify, localStorage */
 
 define(function (require, exports, module) {
 
     "use strict";
 
     var CommandManager = brackets.getModule("command/CommandManager"),
+        Commands = brackets.getModule('command/Commands'),
         EditorManager = brackets.getModule("editor/EditorManager"),
         Editor = brackets.getModule("editor/Editor").Editor,
         DocumentManager = brackets.getModule("document/DocumentManager"),
+        PreferencesManager = brackets.getModule('preferences/PreferencesManager'),
         Menus = brackets.getModule("command/Menus"),
+        COMMAND_TIMESTAMP = "me.drewh.jsbeautify.timeStamp",
+        COMMAND_SAVE_ID = "me.drewh.jsbeautify-autosave",
         COMMAND_ID = "me.drewh.jsbeautify";
 
     var js_beautify = require('beautify');
@@ -78,7 +82,7 @@ define(function (require, exports, module) {
      * Format
      */
 
-    function format() {
+    function format(autoSave) {
 
         var indentChar, indentSize, formattedText;
         var unformattedText, isSelection = false;
@@ -132,7 +136,7 @@ define(function (require, exports, module) {
             break;
 
         default:
-            alert('Could not determine file type');
+            if (!autoSave) alert('Could not determine file type');
             return;
         }
 
@@ -153,19 +157,51 @@ define(function (require, exports, module) {
         });
     }
 
+    function onSave(event, doc) {
+        if ((event.timeStamp - localStorage.getItem(COMMAND_TIMESTAMP)) > 1000) {
+            format(true);
+            localStorage.setItem(COMMAND_TIMESTAMP, event.timeStamp);
+            CommandManager.execute(Commands.FILE_SAVE, {
+                doc: doc
+            });
+        }
+    }
+
+    function toggle(command, fromCheckbox) {
+        var newValue = (typeof fromCheckbox === "undefined") ? enabled : fromCheckbox;
+        $(DocumentManager)[newValue ? 'on' : 'off']('documentSaved', onSave);
+        preferences.setValue('enabled', newValue);
+        command.setChecked(newValue);
+    }
+
+    var preferences = PreferencesManager.getPreferenceStorage(COMMAND_SAVE_ID, {
+        enabled: false
+    });
+    var enabled = preferences.getValue('enabled');
+
     CommandManager.register("Beautify", COMMAND_ID, format);
+    var commandOnSave = CommandManager.register("Beautify on Save", COMMAND_SAVE_ID, function () {
+        toggle(this, !this.getChecked());
+        if (this.getChecked()) localStorage.setItem(COMMAND_TIMESTAMP, 0);
+    });
+
     var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
 
     var windowsCommand = {
         key: "Ctrl-Alt-L",
         platform: "win"
     };
-
     var macCommand = {
         key: "Cmd-Alt-L",
         platform: "mac"
     };
 
     var command = [windowsCommand, macCommand];
+
+    toggle(commandOnSave);
+
+    menu.addMenuDivider();
     menu.addMenuItem(COMMAND_ID, command);
+    menu.addMenuItem(COMMAND_SAVE_ID);
+
 });
