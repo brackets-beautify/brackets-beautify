@@ -10,6 +10,9 @@ define(function (require, exports, module) {
         Editor = brackets.getModule("editor/Editor").Editor,
         DocumentManager = brackets.getModule("document/DocumentManager"),
         Menus = brackets.getModule("command/Menus"),
+        AppInit = brackets.getModule("utils/AppInit"),
+        NodeConnection = brackets.getModule("utils/NodeConnection"),
+        ExtensionUtils = brackets.getModule("utils/ExtensionUtils"),
         COMMAND_ID = "me.drewh.jsbeautify";
 
     var js_beautify = require('beautify');
@@ -17,6 +20,8 @@ define(function (require, exports, module) {
     var html_beautify = require('beautify-html').html_beautify;
 
     var settings = JSON.parse(require("text!settings.json"));
+
+    var nodeConnection  = new NodeConnection();
 
     /**
      *
@@ -78,19 +83,11 @@ define(function (require, exports, module) {
      * Format
      */
 
-    function format() {
+    function format(indentChar, indentSize) {
 
-        var indentChar, indentSize, formattedText;
+        var formattedText;
         var unformattedText, isSelection = false;
         var useTabs = Editor.getUseTabChar();
-
-        if (useTabs) {
-            indentChar = '\t';
-            indentSize = 1;
-        } else {
-            indentChar = ' ';
-            indentSize = Editor.getSpaceUnits();
-        }
 
         var editor = EditorManager.getCurrentFullEditor();
         var selectedText = editor.getSelectedText();
@@ -152,20 +149,77 @@ define(function (require, exports, module) {
             editor.setScrollPos(scroll.x, scroll.y);
         });
     }
+    
+    /**
+     * Prepare format
+     */
 
-    CommandManager.register("Beautify", COMMAND_ID, format);
-    var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
+    function prepareFormat() {
+        var fullPath = DocumentManager.getCurrentDocument().file.fullPath;
+        var parsePromise = nodeConnection.domains.editorconfig.parse(fullPath);
 
-    var windowsCommand = {
-        key: "Ctrl-Alt-L",
-        platform: "win"
-    };
+        parsePromise.done(function (res) {
 
-    var macCommand = {
-        key: "Cmd-Alt-L",
-        platform: "mac"
-    };
+            var indentChar, indentSize;
 
-    var command = [windowsCommand, macCommand];
-    menu.addMenuItem(COMMAND_ID, command);
+            switch (res.indent_style) {
+
+            case 'space':
+                indentChar = ' ';
+                break;
+    
+            case 'tab':
+                indentChar = '\t';
+                break;
+
+            default:
+                if (Editor.getUseTabChar()) {
+                    indentChar = '\t';
+                    indentSize = 1;
+                } else {
+                    indentChar = ' ';
+                    indentSize = Editor.getSpaceUnits();
+                }
+                return;
+            }
+
+            if (indentChar === '\t') {
+                indentSize = res.tab_width || 1;
+            } else {
+                indentSize = res.indent_size || Editor.getSpaceUnits();
+            }
+
+            format(indentChar, indentSize);
+        });
+    }
+
+        
+    /**
+     * Create NodeConnection
+     */
+    
+    AppInit.appReady(function () {
+        nodeConnection.connect(true).done(function () {
+            var path = ExtensionUtils.getModulePath(module, "node/EditorConfigDomain");
+            nodeConnection.loadDomains([path], true).done(function () {
+
+                CommandManager.register("Beautify", COMMAND_ID, prepareFormat);
+                var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
+            
+                var windowsCommand = {
+                    key: "Ctrl-Alt-L",
+                    platform: "win"
+                };
+            
+                var macCommand = {
+                    key: "Cmd-Alt-L",
+                    platform: "mac"
+                };
+            
+                var command = [windowsCommand, macCommand];
+                menu.addMenuItem(COMMAND_ID, command);
+
+            });
+        });
+    });
 });
