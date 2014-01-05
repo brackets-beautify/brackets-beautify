@@ -1,7 +1,7 @@
 {
     "name": "brackets-beautify",
     "title": "Beautify",
-    "version": "0.0.7",
+    "version": "0.0.8",
     "description": "Format JavaScript, HTML, and CSS files",
     "homepage": "https://github.com/drewhjava/brackets-beautify",
     "author": "Drew Hamlett i@drewh.me (https://github.com/drewhjava/)",
