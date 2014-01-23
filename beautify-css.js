@@ -364,9 +364,17 @@
     /*global define */
     if (typeof define === "function") {
         // Add support for require.js
-        define(function (require, exports, module) {
-            exports.css_beautify = css_beautify;
-        });
+       if (typeof define.amd === "undefined") {
+            define(function(require, exports, module) {
+                exports.css_beautify = css_beautify;
+            });
+        } else {
+            // if is AMD ( https://github.com/amdjs/amdjs-api/wiki/AMD#defineamd-property- )
+            define([], function() {
+                return css_beautify;
+            });
+        }
+
     } else if (typeof exports !== "undefined") {
         // Add support for CommonJS. Just put this file somewhere on your require.paths
         // and you will be able to `var html_beautify = require("beautify").html_beautify`.
