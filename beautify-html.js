@@ -31,7 +31,7 @@
 
   Written by Nochum Sossonko, (nsossonko@hotmail.com)
 
-  Based on code initially developed by: Einar Lielmanis, <elfz@laacz.lv>
+  Based on code initially developed by: Einar Lielmanis, <einar@jsbeautifier.org>
     http://jsbeautifier.org/
 
   Usage:
@@ -806,9 +806,9 @@
         return multi_parser.output.join('');
     }
 
-    if (typeof define === "function") {
+    if (typeof define === "function" && define.amd) {
         // Add support for require.js
-        define([], function(js_beautify, css_beautify) {
+        define(["./beautify", "./beautify-css"], function(js_beautify, css_beautify) {
             return {
               html_beautify: function(html_source, options) {
                 return style_html(html_source, options, js_beautify, css_beautify);
@@ -818,8 +818,8 @@
     } else if (typeof exports !== "undefined") {
         // Add support for CommonJS. Just put this file somewhere on your require.paths
         // and you will be able to `var html_beautify = require("beautify").html_beautify`.
-        // var js_beautify = require('./beautify.js').js_beautify;
-        // var css_beautify = require('./beautify-css.js').css_beautify;
+        var js_beautify = require('./beautify.js').js_beautify;
+        var css_beautify = require('./beautify-css.js').css_beautify;
 
         exports.html_beautify = function(html_source, options) {
             return style_html(html_source, options, js_beautify, css_beautify);

@@ -31,7 +31,7 @@
 
     Written by Harutyun Amirjanyan, (amirjanyan@gmail.com)
 
-    Based on code initially developed by: Einar Lielmanis, <elfz@laacz.lv>
+    Based on code initially developed by: Einar Lielmanis, <einar@jsbeautifier.org>
         http://jsbeautifier.org/
 
     Usage:
@@ -362,10 +362,10 @@
     };
 
     /*global define */
-    if (typeof define === "function") {
+    if (typeof define === "function" && define.amd) {
         // Add support for require.js
-        define(function (require, exports, module) {
-            exports.css_beautify = css_beautify;
+        define([], function () {
+            return css_beautify;
         });
     } else if (typeof exports !== "undefined") {
         // Add support for CommonJS. Just put this file somewhere on your require.paths
