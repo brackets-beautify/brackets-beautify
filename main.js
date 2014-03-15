@@ -5,10 +5,13 @@ define(function (require, exports, module) {
 
     "use strict";
 
-    var CommandManager = brackets.getModule("command/CommandManager"),
+    var AppInit = brackets.getModule("utils/AppInit"),
+        CommandManager = brackets.getModule("command/CommandManager"),
         Commands = brackets.getModule('command/Commands'),
         EditorManager = brackets.getModule("editor/EditorManager"),
         Editor = brackets.getModule("editor/Editor").Editor,
+        FileSystem = brackets.getModule("filesystem/FileSystem"),
+        ProjectManager = brackets.getModule("project/ProjectManager"),
         DocumentManager = brackets.getModule("document/DocumentManager"),
         PreferencesManager = brackets.getModule('preferences/PreferencesManager'),
         Menus = brackets.getModule("command/Menus"),
@@ -21,6 +24,7 @@ define(function (require, exports, module) {
     var html_beautify = require('beautify-html').html_beautify;
 
     var settings = JSON.parse(require("text!settings.json"));
+    var settingsFileName = '.jsbeautifyrc';
 
     /**
      *
@@ -88,6 +92,7 @@ define(function (require, exports, module) {
         var unformattedText, isSelection = false;
         var useTabs = Editor.getUseTabChar();
 
+        console.log(settings);
         if (useTabs) {
             indentChar = '\t';
             indentSize = 1;
@@ -167,6 +172,20 @@ define(function (require, exports, module) {
         }
     }
 
+    function loadConfig() {
+        var settingsFile = FileSystem.getFileForPath(ProjectManager.getProjectRoot().fullPath + settingsFileName);
+        settingsFile.read( function (err, content) {
+               try {
+                    settings = JSON.parse(content);
+                    console.log('settings loaded'+settings);
+                } catch (e) {
+                    console.error("Beautify: error parsing " + settingsFile+ ". Details: " + e);
+                    result.reject(e);
+                    return;
+                }
+        } );
+    }
+
     function toggle(command, fromCheckbox) {
         var newValue = (typeof fromCheckbox === "undefined") ? enabled : fromCheckbox;
         $(DocumentManager)[newValue ? 'on' : 'off']('documentSaved', onSave);
@@ -203,5 +222,21 @@ define(function (require, exports, module) {
     menu.addMenuDivider();
     menu.addMenuItem(COMMAND_ID, command);
     menu.addMenuItem(COMMAND_SAVE_ID);
+    AppInit.appReady(function () {
+         $(DocumentManager)
+            .on("documentRefreshed.beautify", function (e, document) {
+                // if this project's JSHint config has been updated, reload
+                if (document.file.fullPath ===
+                            ProjectManager.getProjectRoot().fullPath + settingsFileName) {
+                    loadConfig();
+                }
+            });
+        $(ProjectManager)
+            .on("projectOpen.beautify", function () {
+                loadConfig();
+            });
+        loadConfig();
+    });
+
 
 });
