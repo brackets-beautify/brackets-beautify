@@ -180,7 +180,6 @@ define(function (require, exports, module) {
                     console.log('settings loaded'+settings);
                 } catch (e) {
                     console.error("Beautify: error parsing " + settingsFile+ ". Details: " + e);
-                    result.reject(e);
                     return;
                 }
         } );
