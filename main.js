@@ -17,7 +17,7 @@ define(function (require, exports, module) {
         COMMAND_ID = "me.drewh.jsbeautify";
 
     var js_beautify = require('beautify');
-    var css_beautify = require('beautify-css').css_beautify;
+    var css_beautify = require('beautify-css');
     var html_beautify = require('beautify-html').html_beautify;
 
     var settings = JSON.parse(require("text!settings.json"));

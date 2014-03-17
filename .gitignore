@@ -5,3 +5,5 @@ temp/beautify-css.js
 temp/beautify-html.js
 
 temp/beautify.js
+
+*.zip
