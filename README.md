@@ -3,12 +3,12 @@ brackets-beautify-extension
 
 Compatible with Sprint 22 and above
 
-Format `HTML`, `CSS`, and `JavaScript` files by `Edit > Beautify` menu or `Cmd-Alt-L(Mac) / Ctrl-Alt-L(Win)` key.
+Format `HTML`, `CSS`, and `JavaScript` files by `Edit > Beautify` menu or `Cmd-Shift-L(Mac) / Ctrl-Shift-L(Win)` key.
 
 Note
 ===
 
-For any pull requesets dealing with beautify-css.js, beautify.js and beautify-html.js, please send to 
+For any pull requesets dealing with beautify-css.js, beautify.js and beautify-html.js, please send to
 
 https://github.com/einars/js-beautify
 
