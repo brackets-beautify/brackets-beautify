@@ -14,7 +14,9 @@ define(function (require, exports, module) {
         Menus = brackets.getModule("command/Menus"),
         COMMAND_TIMESTAMP = "me.drewh.jsbeautify.timeStamp",
         COMMAND_SAVE_ID = "me.drewh.jsbeautify-autosave",
-        COMMAND_ID = "me.drewh.jsbeautify";
+        COMMAND_ID = "me.drewh.jsbeautify",
+        CONTEXTUAL_COMMAND_ID = "me.drewh.jsbeautifyContextual";
+
 
     var js_beautify = require('beautify');
     var css_beautify = require('beautify-css');
@@ -157,6 +159,7 @@ define(function (require, exports, module) {
         });
     }
 
+
     function onSave(event, doc) {
         if ((event.timeStamp - localStorage.getItem(COMMAND_TIMESTAMP)) > 1000) {
             format(true);
@@ -177,7 +180,13 @@ define(function (require, exports, module) {
     var preferences = PreferencesManager.getPreferenceStorage(COMMAND_SAVE_ID, {
         enabled: false
     });
+
     var enabled = preferences.getValue('enabled');
+
+    /**
+     * File menu
+     */
+
 
     CommandManager.register("Beautify", COMMAND_ID, format);
     var commandOnSave = CommandManager.register("Beautify on Save", COMMAND_SAVE_ID, function () {
@@ -188,11 +197,11 @@ define(function (require, exports, module) {
     var menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
 
     var windowsCommand = {
-        key: "Ctrl-Alt-L",
+        key: "Ctrl-Shift-L",
         platform: "win"
     };
     var macCommand = {
-        key: "Cmd-Alt-L",
+        key: "Cmd-Shift-L",
         platform: "mac"
     };
 
@@ -203,5 +212,13 @@ define(function (require, exports, module) {
     menu.addMenuDivider();
     menu.addMenuItem(COMMAND_ID, command);
     menu.addMenuItem(COMMAND_SAVE_ID);
+
+    /**
+     * Contextual menu
+     */
+
+    CommandManager.register("Beautify", CONTEXTUAL_COMMAND_ID, format);
+    var contextMenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU);
+    contextMenu.addMenuItem(CONTEXTUAL_COMMAND_ID);
 
 });
