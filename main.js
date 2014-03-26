@@ -230,6 +230,7 @@ define(function (require, exports, module) {
     menu.addMenuDivider();
     menu.addMenuItem(COMMAND_ID, command);
     menu.addMenuItem(COMMAND_SAVE_ID);
+
     AppInit.appReady(function () {
          $(DocumentManager)
             .on("documentRefreshed.beautify", function (e, document) {
