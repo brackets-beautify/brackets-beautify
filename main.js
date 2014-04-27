@@ -1,4 +1,3 @@
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, regexp: true, indent: 4 */
 /*global define, $, brackets, window, js_beautify, style_html, css_beautify, localStorage */
 
 define(function (require, exports, module) {
@@ -20,8 +19,9 @@ define(function (require, exports, module) {
         COMMAND_ID = "me.drewh.jsbeautify",
         CONTEXTUAL_COMMAND_ID = "me.drewh.jsbeautifyContextual";
 
-
-    var js_beautify = require('beautify');
+    var PreferencesManager = brackets.getModule("preferences/PreferencesManager");
+    require('thirdparty/js');
+    var js_beautify = require('thirdparty/js/lib/beautify').beautify;
     var css_beautify = require('beautify-css');
     var html_beautify = require('beautify-html').html_beautify;
 
@@ -177,15 +177,15 @@ define(function (require, exports, module) {
 
     function loadConfig() {
         var settingsFile = FileSystem.getFileForPath(ProjectManager.getProjectRoot().fullPath + settingsFileName);
-        settingsFile.read( function (err, content) {
-               try {
-                    settings = JSON.parse(content);
-                    console.log('settings loaded'+settings);
-                } catch (e) {
-                    console.error("Beautify: error parsing " + settingsFile+ ". Details: " + e);
-                    return;
-                }
-        } );
+        settingsFile.read(function (err, content) {
+            try {
+                settings = JSON.parse(content);
+                console.log('settings loaded' + settings);
+            } catch (e) {
+                console.error("Beautify: error parsing " + settingsFile + ". Details: " + e);
+                return;
+            }
+        });
     }
 
     function toggle(command, fromCheckbox) {
@@ -232,21 +232,19 @@ define(function (require, exports, module) {
     menu.addMenuItem(COMMAND_SAVE_ID);
 
     AppInit.appReady(function () {
-         $(DocumentManager)
-            .on("documentRefreshed.beautify", function (e, document) {
-                // if this project's JSHint config has been updated, reload
-                if (document.file.fullPath ===
-                            ProjectManager.getProjectRoot().fullPath + settingsFileName) {
-                    loadConfig();
-                }
-            });
+        $(DocumentManager).on("documentRefreshed.beautify", function (e, document) {
+            // if this project's JSHint config has been updated, reload
+            if (document.file.fullPath ===
+                ProjectManager.getProjectRoot().fullPath + settingsFileName) {
+                loadConfig();
+            }
+        });
         $(ProjectManager)
             .on("projectOpen.beautify", function () {
                 loadConfig();
             });
         loadConfig();
     });
-
 
     /**
      * Contextual menu
