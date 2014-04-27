@@ -14,16 +14,17 @@ define(function (require, exports, module) {
         DocumentManager = brackets.getModule("document/DocumentManager"),
         PreferencesManager = brackets.getModule('preferences/PreferencesManager'),
         Menus = brackets.getModule("command/Menus"),
+        NodeDomain = brackets.getModule("utils/NodeDomain"),
+        ExtensionUtils = brackets.getModule("utils/ExtensionUtils"),
         COMMAND_TIMESTAMP = "me.drewh.jsbeautify.timeStamp",
         COMMAND_SAVE_ID = "me.drewh.jsbeautify-autosave",
         COMMAND_ID = "me.drewh.jsbeautify",
         CONTEXTUAL_COMMAND_ID = "me.drewh.jsbeautifyContextual";
 
-    var PreferencesManager = brackets.getModule("preferences/PreferencesManager");
-    require('thirdparty/js');
-    var js_beautify = require('thirdparty/js/lib/beautify').beautify;
-    var css_beautify = require('beautify-css');
-    var html_beautify = require('beautify-html').html_beautify;
+
+    var js_beautify = require('thirdparty/js-beautify/js/lib/beautify').js_beautify;
+    var css_beautify = require('thirdparty/js-beautify/js/lib/beautify-css').css_beautify;
+    var html_beautify = require('thirdparty/js-beautify/js/lib/beautify-html').html_beautify;
 
     var settings = JSON.parse(require("text!settings.json"));
     var settingsFileName = '.jsbeautifyrc';
@@ -232,17 +233,18 @@ define(function (require, exports, module) {
     menu.addMenuItem(COMMAND_SAVE_ID);
 
     AppInit.appReady(function () {
+
         $(DocumentManager).on("documentRefreshed.beautify", function (e, document) {
-            // if this project's JSHint config has been updated, reload
             if (document.file.fullPath ===
                 ProjectManager.getProjectRoot().fullPath + settingsFileName) {
                 loadConfig();
             }
         });
-        $(ProjectManager)
-            .on("projectOpen.beautify", function () {
-                loadConfig();
-            });
+
+        $(ProjectManager).on("projectOpen.beautify", function () {
+            loadConfig();
+        });
+
         loadConfig();
     });
 
