@@ -14,7 +14,11 @@
         "jsbeautify",
         "javascript formatting",
         "html formatting",
-        "css formatting"
+        "css formatting",
+        "tidy",
+        "tidy html",
+        "tidy css",
+        "tidy javascript"
     ],
     "files": [
         "main.js",
