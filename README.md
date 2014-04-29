@@ -21,7 +21,7 @@ Usage
 Contributing
 ---
 
-For any pull requesets dealing with the actual formatting or the soruce in beautify-css.js, beautify.js and beautify-html.js, please send to:
+For any pull requesets dealing with the actual formatting or the source in beautify-css.js, beautify.js and beautify-html.js, please send to:
 
 https://github.com/einars/js-beautify/issues
 
