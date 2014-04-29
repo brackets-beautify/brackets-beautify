@@ -62,12 +62,12 @@ define(function (require, exports, module) {
 
     function _formatHTML(unformattedText, indentChar, indentSize) {
 
-        var formattedText = html_beautify(unformattedText, {
+        var options = {
             indent_size: indentSize,
-            indent_char: indentChar,
-            max_char: 0,
-            unformatted: []
-        });
+            indent_char: indentChar
+        };
+
+        var formattedText = html_beautify(unformattedText, $.extend(options, settings));
 
         return formattedText;
     }
