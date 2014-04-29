@@ -15,8 +15,10 @@ define(function (require, exports, module) {
         PreferencesManager = brackets.getModule('preferences/PreferencesManager'),
         Menus = brackets.getModule("command/Menus"),
         NodeDomain = brackets.getModule("utils/NodeDomain"),
-        ExtensionUtils = brackets.getModule("utils/ExtensionUtils"),
-        COMMAND_TIMESTAMP = "me.drewh.jsbeautify.timeStamp",
+        NodeConnection = brackets.getModule("utils/NodeConnection"),
+        ExtensionUtils = brackets.getModule("utils/ExtensionUtils");
+
+    var COMMAND_TIMESTAMP = "me.drewh.jsbeautify.timeStamp",
         COMMAND_SAVE_ID = "me.drewh.jsbeautify-autosave",
         COMMAND_ID = "me.drewh.jsbeautify",
         CONTEXTUAL_COMMAND_ID = "me.drewh.jsbeautifyContextual";
@@ -28,6 +30,8 @@ define(function (require, exports, module) {
 
     var settings = JSON.parse(require("text!settings.json"));
     var settingsFileName = '.jsbeautifyrc';
+
+    var beautifyPreferences =  PreferencesManager.getExtensionPrefs('beautify');
 
     /**
      *
@@ -86,6 +90,33 @@ define(function (require, exports, module) {
     }
 
     /**
+     *
+     * @param {String} unformattedText
+     * @param {String} indentChar
+     * @param {String} indentSize
+     */
+
+    function _formatSASS(indentChar, indentSize, callback) {
+        if (indentChar === '\t') {
+            indentSize = 't';
+        }
+        var path = beautifyPreferences.get('sassConvertPath');
+
+        if (!path) {
+            alert('You need to provide a path to the sass-convert program');
+        }
+        var simpleDomain = new NodeDomain("sassformat", ExtensionUtils.getModulePath(module, "node/SassFormatDomain"));
+        var fullPath = DocumentManager.getCurrentDocument().file.fullPath;
+        var parsePromise = simpleDomain.exec('parse', path, fullPath, indentSize);
+        parsePromise.done(function (res) {
+            return callback(null, res);
+        });
+        parsePromise.fail(function (err) {
+            return callback(err);
+        });
+    }
+
+    /**
      * Format
      */
 
@@ -116,8 +147,6 @@ define(function (require, exports, module) {
             unformattedText = DocumentManager.getCurrentDocument().getText();
         }
 
-        var cursor = editor.getCursorPos();
-        var scroll = editor.getScrollPos();
         var doc = DocumentManager.getCurrentDocument();
 
         var language = doc.getLanguage();
@@ -128,6 +157,7 @@ define(function (require, exports, module) {
         case 'javascript':
         case 'json':
             formattedText = _formatJavascript(unformattedText, indentChar, indentSize);
+            batchUpdate(formattedText, isSelection);
             break;
 
         case 'html':
@@ -135,18 +165,39 @@ define(function (require, exports, module) {
         case 'xml':
         case 'ejs':
             formattedText = _formatHTML(unformattedText, indentChar, indentSize);
+            batchUpdate(formattedText, isSelection);
             break;
 
         case 'css':
         case 'less':
-        case 'scss':
             formattedText = _formatCSS(unformattedText, indentChar, indentSize);
+            batchUpdate(formattedText, isSelection);
             break;
-
+        case 'scss':
+            _formatSASS(indentChar, indentSize, function (err, res) {
+                if (err) {
+                    alert('An error occurred formatting the SASS file');
+                } else {
+                    // SASS format only works on entire file for now
+                    batchUpdate(res, false);
+                }
+            });
+            break;
         default:
             if (!autoSave) alert('Could not determine file type');
             return;
         }
+    }
+
+    function batchUpdate(formattedText, isSelection) {
+
+        var editor = EditorManager.getCurrentFullEditor();
+
+        var cursor = editor.getCursorPos();
+        var scroll = editor.getScrollPos();
+        var doc = DocumentManager.getCurrentDocument();
+
+        var selection = editor.getSelection();
 
         doc.batchOperation(function () {
 
@@ -175,6 +226,7 @@ define(function (require, exports, module) {
             });
         }
     }
+
 
     function loadConfig() {
         var settingsFile = FileSystem.getFileForPath(ProjectManager.getProjectRoot().fullPath + settingsFileName);
@@ -206,7 +258,6 @@ define(function (require, exports, module) {
      * File menu
      */
 
-
     CommandManager.register("Beautify", COMMAND_ID, format);
     var commandOnSave = CommandManager.register("Beautify on Save", COMMAND_SAVE_ID, function () {
         toggle(this, !this.getChecked());
@@ -219,6 +270,7 @@ define(function (require, exports, module) {
         key: "Ctrl-Shift-L",
         platform: "win"
     };
+
     var macCommand = {
         key: "Cmd-Shift-L",
         platform: "mac"
@@ -246,6 +298,7 @@ define(function (require, exports, module) {
         });
 
         loadConfig();
+
     });
 
     /**
