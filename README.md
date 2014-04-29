@@ -19,25 +19,6 @@ Usage
 
 `Edit > Beautify` menu or `Cmd-Shift-L(Mac) / Ctrl-Shift-L(Win)` key.
 
-Contributing
----
-
-For any pull requesets dealing with the actual formatting or the source in beautify-css.js, beautify.js and beautify-html.js, please send to:
-
-https://github.com/einars/js-beautify/issues
-
-=======
-
-### Alternative Install
-
-Download zip and extract into arbitrary directory (or clone source files), then move the folder to the extensions folder (you can open this folder by clicking "Help > Show Extensions Folder" menu).
-
-Usage
----
-
-`Edit > Beautify` menu or `Cmd-Shift-L(Mac) / Ctrl-Shift-L(Win)` key.
-
-
 SASS Formatting
 ---
 
@@ -80,5 +61,9 @@ Contributing
 For any pull requesets dealing with the actual formatting or the source in beautify-css.js, beautify.js and beautify-html.js, please send to:
 
 https://github.com/einars/js-beautify/issues
+
+
+
+
 
 
