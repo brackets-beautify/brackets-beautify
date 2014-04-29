@@ -50,15 +50,12 @@ On MacOSX you can go into terminal and type ```which sass-convert```
 
 Since I use rbenv for manageing Ruby versions it gave me this.
 ```/Users/drewh/.rbenv/shims/sass-convert```
->>>>>>> sass-format
 
 + Now go open Brackets and go to ```Debug > Open Preferences File```
 
-<<<<<<< HEAD
 
-=======
 It will look something like this.
-	
+
 	{
 	    "useTabChar": false,
 	    "tabSize": 2,
@@ -71,7 +68,7 @@ It will look something like this.
 	    "linting.collapsed": false,
 	    "quickview.enabled": true
 	}
-	
+
 Now add ```"beautify.sassConvertPath": "/Users/drewh/.rbenv/shims/sass-convert"``` at the bottom.  Change the path name to the path all the way to executable.
 
 You will now be able to format scss files.
@@ -85,5 +82,3 @@ For any pull requesets dealing with the actual formatting or the source in beaut
 https://github.com/einars/js-beautify/issues
 
 
-
->>>>>>> sass-format
