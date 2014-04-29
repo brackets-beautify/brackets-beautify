@@ -1,7 +1,7 @@
 {
     "name": "brackets-beautify",
     "title": "Beautify",
-    "version": "1.0.4",
+    "version": "1.1.1",
     "description": "Format JavaScript, HTML, and CSS files",
     "homepage": "https://github.com/drewhjava/brackets-beautify",
     "author": "Drew Hamlett i@drewh.me (https://github.com/drewhjava/)",
@@ -20,14 +20,17 @@
         "tidy css",
         "tidy javascript",
         "pretty",
-        "prettify"
+        "prettify",
+        "sass format",
+        "scss format",
+        "sass",
+        "scss",
+        "sass beautify",
+        "sass tidy"
     ],
     "files": [
         "main.js",
-        "settings.json",
-        "beautify.js",
-        "beautify-html.js",
-        "beautify-css.js"
+        "settings.json"
     ],
     "engines": {
         "brackets": ">=0.22.0"
