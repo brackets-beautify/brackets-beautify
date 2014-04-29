@@ -37,6 +37,7 @@ Since I use rbenv for manageing Ruby versions it gave me this.
 
 It will look something like this.
 
+
 	{
 	    "useTabChar": false,
 	    "tabSize": 2,
@@ -49,6 +50,7 @@ It will look something like this.
 	    "linting.collapsed": false,
 	    "quickview.enabled": true
 	}
+
 
 Now add ```"beautify.sassConvertPath": "/Users/drewh/.rbenv/shims/sass-convert"``` at the bottom.  Change the path name to the path all the way to executable.
 
