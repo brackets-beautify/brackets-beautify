@@ -8,7 +8,6 @@ Compatible with  Sprint 22 and above.
 Installation
 ---
 Search for "Beautify" in [Extention Manager](https://github.com/adobe/brackets/wiki/Brackets-Extensions), then click on `Install` for Beautify by Drew Hamlett.
-<<<<<<< HEAD
 
 ### Alternative Install
 
@@ -27,29 +26,30 @@ You need to supply an absolute path to the sass-convert executble for SASS forma
 + Install [SASS Installation website](http://sass-lang.com/install)
 + Get absolute path to executable
 
-On MacOSX you can go into terminal and type ```which sass-convert```
+On MacOSX you can go into terminal and type `which sass-convert`
 
 Since I use rbenv for manageing Ruby versions it gave me this.
-```/Users/drewh/.rbenv/shims/sass-convert```
+`/Users/drewh/.rbenv/shims/sass-convert`
 
-+ Now go open Brackets and go to ```Debug > Open Preferences File```
++ Now go open Brackets and go to `Debug > Open Preferences File`
 
 
 It will look something like this.
 
-
-	{
-	    "useTabChar": false,
-	    "tabSize": 2,
-	    "spaceUnits": 2,
-	    "closeBrackets": true,
-	    "showLineNumbers": true,
-	    "styleActiveLine": false,
-	    "wordWrap": false,
-	    "linting.enabled": true,
-	    "linting.collapsed": false,
-	    "quickview.enabled": true
-	}
+```js
+{
+    "useTabChar": false,
+    "tabSize": 2,
+    "spaceUnits": 2,
+    "closeBrackets": true,
+    "showLineNumbers": true,
+    "styleActiveLine": false,
+    "wordWrap": false,
+    "linting.enabled": true,
+    "linting.collapsed": false,
+    "quickview.enabled": true
+}
+```
 
 
 Now add ```"beautify.sassConvertPath": "/Users/drewh/.rbenv/shims/sass-convert"``` at the bottom.  Change the path name to the path all the way to executable.
