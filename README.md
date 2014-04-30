@@ -1,13 +1,13 @@
 brackets-beautify
 =================
 
-[Brackets](http://brackets.io/) Extention that formats open HTML, CSS, and JavaScript files using [js-beautify](https://github.com/einars/js-beautify).
+[Brackets](http://brackets.io/) Extension that formats open HTML, CSS, and JavaScript files using [js-beautify](https://github.com/einars/js-beautify).
 
 Compatible with  Sprint 22 and above.
 
 Installation
 ---
-Search for "Beautify" in [Extention Manager](https://github.com/adobe/brackets/wiki/Brackets-Extensions), then click on `Install` for Beautify by Drew Hamlett.
+Search for "Beautify" in [Extension Manager](https://github.com/adobe/brackets/wiki/Brackets-Extensions), then click on `Install` for Beautify by Drew Hamlett.
 
 ### Alternative Install
 
