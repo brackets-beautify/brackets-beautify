@@ -231,12 +231,14 @@ define(function (require, exports, module) {
     function loadConfig() {
         var settingsFile = FileSystem.getFileForPath(ProjectManager.getProjectRoot().fullPath + settingsFileName);
         settingsFile.read(function (err, content) {
-            try {
-                settings = JSON.parse(content);
-                console.log('settings loaded' + settings);
-            } catch (e) {
-                console.error("Beautify: error parsing " + settingsFile + ". Details: " + e);
-                return;
+            if (content) {
+                try {
+                    settings = JSON.parse(content);
+                    console.log('settings loaded' + settings);
+                } catch (e) {
+                    console.error("Beautify: error parsing " + settingsFile + ". Details: " + e);
+                    return;
+                }
             }
         });
     }
