@@ -18,8 +18,11 @@ Usage
 
 `Edit > Beautify` menu or `Cmd-Shift-L(Mac) / Ctrl-Shift-L(Win)` key.
 
-SASS Formatting
----
+### Configure
+
+Edit [`settings.json`](https://github.com/einars/js-beautify#options) in `[Brackets extensions folder]\user\brackets-beautify`.
+
+### SASS Formatting
 
 You need to supply an absolute path to the sass-convert executble for SASS formatting to work.
 
