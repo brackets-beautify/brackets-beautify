@@ -31,6 +31,9 @@ On MacOSX you can go into terminal and type `which sass-convert`
 Since I use rbenv for manageing Ruby versions it gave me this.
 `/Users/drewh/.rbenv/shims/sass-convert`
 
+On Windows your path will be something similiar to this.
+`C:\\Ruby193\\bin\\sass-convert.bat`
+
 + Now go open Brackets and go to `Debug > Open Preferences File`
 
 
@@ -56,6 +59,7 @@ Now add ```"beautify.sassConvertPath": "/Users/drewh/.rbenv/shims/sass-convert"`
 
 You will now be able to format scss files.
 
+For windows add  `"beautify.sassConvertPath": "C:\\Ruby193\\bin\\sass-convert.bat"`
 
 Contributing
 ---
