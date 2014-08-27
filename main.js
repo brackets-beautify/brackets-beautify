@@ -130,7 +130,7 @@ define(function (require, exports, module) {
         }
         var path = beautifyPreferences.get('sassConvertPath');
         if (!path) {
-            __debug(Strings.SASS_ERROR);
+            __debug(Strings.SASS_ERROR, 0); // Don't error on this
         }
         var simpleDomain = new NodeDomain('sassformat', ExtensionUtils.getModulePath(module, 'node/SassFormatDomain'));
         var fullPath = DocumentManager.getCurrentDocument().file.fullPath;
@@ -171,7 +171,8 @@ define(function (require, exports, module) {
         var indentChar, indentSize, formattedText;
         var unformattedText, isSelection = false;
         var useTabs = Editor.getUseTabChar();
-        __debug(settings);
+
+        __debug(settings, 0);
         if (useTabs) {
             indentChar = '\t';
             indentSize = 1;
@@ -179,24 +180,30 @@ define(function (require, exports, module) {
             indentChar = ' ';
             indentSize = Editor.getSpaceUnits();
         }
+
         var editor = EditorManager.getCurrentFullEditor();
         var selectedText = editor.getSelectedText();
         var selection = editor.getSelection();
+
         if (selectedText.length > 0) {
             isSelection = true;
             unformattedText = selectedText;
         } else {
             unformattedText = DocumentManager.getCurrentDocument().getText();
         }
+
         var doc = DocumentManager.getCurrentDocument();
         var language = doc.getLanguage();
         var fileType = language._id;
+
         switch (fileType) {
+
         case 'javascript':
         case 'json':
             formattedText = _formatJavascript(unformattedText, indentChar, indentSize);
             batchUpdate(formattedText, isSelection);
             break;
+
         case 'html':
         case 'php':
         case 'xml':
@@ -212,16 +219,23 @@ define(function (require, exports, module) {
             break;
 
         case 'scss':
-            _formatSASS(indentChar, indentSize, function (err, res) {
-                if (err) {
-                    formattedText = _formatCSS(unformattedText, indentChar, indentSize);
-                    batchUpdate(formattedText, isSelection);
-                } else {
-                    // SASS format only works on entire file for now
-                    batchUpdate(res, false);
-                }
-            });
+            var path = beautifyPreferences.get('sassConvertPath');
+            __debug(path, 0);
+            if (!path) {
+                formattedText = _formatCSS(unformattedText, indentChar, indentSize);
+                batchUpdate(formattedText, isSelection);
+            } else {
+                _formatSASS(indentChar, indentSize, function (err, res) {
+                    if (err) {
+                        __debug(Strings.SASS_ERROR);
+                    } else {
+                        // SASS format only works on entire file for now
+                        batchUpdate(res, false);
+                    }
+                });
+            }
             break;
+
         default:
             if (!autoSave) {
                 alert(Strings.FILE_ERROR);
@@ -248,9 +262,9 @@ define(function (require, exports, module) {
             if (content) {
                 try {
                     settings = JSON.parse(content);
-                    __debug('settings loaded' + settings);
+                    __debug('settings loaded' + settings, 0);
                 } catch (e) {
-                    __debug('error parsing ' + settingsFile + '. Details: ' + e, 0);
+                    __debug('error parsing ' + settingsFile + '. Details: ' + e);
                     return;
                 }
             }

@@ -31,6 +31,8 @@ On MacOSX you can go into terminal and type `which sass-convert`
 Since I use rbenv for manageing Ruby versions it gave me this.
 `/Users/drewh/.rbenv/shims/sass-convert`
 
+If you use system Ruby, when you do `sudo gem install sass` your path will be something like `/usr/bin/sass-convert`
+
 On Windows your path will be something similiar to this.
 `C:\\Ruby193\\bin\\sass-convert.bat`
 
