@@ -3,11 +3,8 @@
 define(function (require, exports, module) {
 
     'use strict';
-    /* -------------------
 
- Globals
-
-*/
+    /* Globals */
     var DEBUG_MODE,
         COMMAND_ID = 'me.drewh.jsbeautify',
         COMMAND_SAVE_ID = COMMAND_ID + '.autosave',
@@ -27,20 +24,14 @@ define(function (require, exports, module) {
         ProjectManager = brackets.getModule('project/ProjectManager'),
         DocumentManager = brackets.getModule('document/DocumentManager'),
         PreferencesManager = brackets.getModule('preferences/PreferencesManager');
-    /* -------------------
 
- Formatters
-
-*/
+    /* Formatters */
     var Strings = require('strings'),
         js_beautify = require('thirdparty/js-beautify/js/lib/beautify').js_beautify,
         css_beautify = require('thirdparty/js-beautify/js/lib/beautify-css').css_beautify,
         html_beautify = require('thirdparty/js-beautify/js/lib/beautify-html').html_beautify;
-    /* -------------------
 
- Variables
-
-*/
+    /* Variables */
     var beautifyOnSave,
         settingsFileName = '.jsbeautifyrc',
         menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU),
@@ -139,7 +130,7 @@ define(function (require, exports, module) {
         }
         var path = beautifyPreferences.get('sassConvertPath');
         if (!path) {
-            alert(Strings.SASS_ERROR);
+            __debug(Strings.SASS_ERROR);
         }
         var simpleDomain = new NodeDomain('sassformat', ExtensionUtils.getModulePath(module, 'node/SassFormatDomain'));
         var fullPath = DocumentManager.getCurrentDocument().file.fullPath;
@@ -213,15 +204,18 @@ define(function (require, exports, module) {
             formattedText = _formatHTML(unformattedText, indentChar, indentSize);
             batchUpdate(formattedText, isSelection);
             break;
+
         case 'css':
         case 'less':
             formattedText = _formatCSS(unformattedText, indentChar, indentSize);
             batchUpdate(formattedText, isSelection);
             break;
+
         case 'scss':
             _formatSASS(indentChar, indentSize, function (err, res) {
                 if (err) {
-                    alert(Strings.SASS_FORMAT);
+                    formattedText = _formatCSS(unformattedText, indentChar, indentSize);
+                    batchUpdate(formattedText, isSelection);
                 } else {
                     // SASS format only works on entire file for now
                     batchUpdate(res, false);
