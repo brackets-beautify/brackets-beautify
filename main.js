@@ -219,21 +219,18 @@ define(function (require, exports, module) {
             break;
 
         case 'scss':
-            var path = beautifyPreferences.get('sassConvertPath');
-            __debug(path, 0);
-            if (!path) {
-                formattedText = _formatCSS(unformattedText, indentChar, indentSize);
-                batchUpdate(formattedText, isSelection);
-            } else {
-                _formatSASS(indentChar, indentSize, function (err, res) {
-                    if (err) {
-                        __debug(Strings.SASS_ERROR);
-                    } else {
-                        // SASS format only works on entire file for now
-                        batchUpdate(res, false);
-                    }
-                });
-            }
+
+            _formatSASS(indentChar, indentSize, function (err, res) {
+                if (err) {
+                    console.log(err)
+                    formattedText = _formatCSS(unformattedText, indentChar, indentSize);
+                    batchUpdate(formattedText, isSelection);
+                } else {
+                    // SASS format only works on entire file for now
+                    batchUpdate(res, false);
+                }
+            });
+
             break;
 
         default:

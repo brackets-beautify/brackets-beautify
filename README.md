@@ -57,11 +57,11 @@ It will look something like this.
 ```
 
 
-Now add ```"beautify.sassConvertPath": "/Users/drewh/.rbenv/shims/sass-convert"``` at the bottom.  Change the path name to the path all the way to executable.
+Now add ```"me.drewh.jsbeautify.sassConvertPath": "/Users/drewh/.rbenv/shims/sass-convert"``` at the bottom.  Change the path name to the path all the way to executable.
 
 You will now be able to format scss files.
 
-For windows add  `"beautify.sassConvertPath": "C:\\Ruby193\\bin\\sass-convert.bat"`
+For windows add  `"me.drewh.jsbeautify.sassConvertPath": "C:\\Ruby193\\bin\\sass-convert.bat"`
 
 Contributing
 ---
