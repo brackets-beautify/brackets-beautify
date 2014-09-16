@@ -110,10 +110,11 @@ define(function (require, exports, module) {
      */
 
     function _formatCSS(unformattedText, indentChar, indentSize) {
-        var formattedText = css_beautify(unformattedText, {
+        var options = {
             indent_size: indentSize,
             indent_char: indentChar
-        });
+        };
+        var formattedText = css_beautify(unformattedText, $.extend(options, settings));
         return formattedText;
     }
 
