@@ -7,6 +7,7 @@ define(function (require, exports, module) {
     /* Globals */
     var DEBUG_MODE,
         COMMAND_ID = 'me.drewh.jsbeautify',
+        OLD_COMMAND_ID = 'beautify',
         COMMAND_SAVE_ID = COMMAND_ID + '.autosave',
         COMMAND_TIMESTAMP = COMMAND_ID + '-timeStamp',
         CONTEXTUAL_COMMAND_ID = COMMAND_ID + 'Contextual';
@@ -38,6 +39,7 @@ define(function (require, exports, module) {
         settings = JSON.parse(require('text!settings.json')),
         debugPreferences = PreferencesManager.getExtensionPrefs('debug'),
         beautifyPreferences = PreferencesManager.getExtensionPrefs(COMMAND_ID),
+        oldBeautifyPreferences = PreferencesManager.getExtensionPrefs(OLD_COMMAND_ID),
         windowsCommand = {
             key: 'Ctrl-Shift-L',
             platform: 'win'
@@ -129,9 +131,17 @@ define(function (require, exports, module) {
             indentSize = 't';
         }
         var path = beautifyPreferences.get('sassConvertPath');
+
+        if (!path) {
+            // try old one
+            console.log('Fallback to old preference');
+            path = oldBeautifyPreferences.get('sassConvertPath');
+        }
+
         if (!path) {
             __debug(Strings.SASS_ERROR, 0); // Don't error on this
         }
+
         var simpleDomain = new NodeDomain('sassformat', ExtensionUtils.getModulePath(module, 'node/SassFormatDomain'));
         var fullPath = DocumentManager.getCurrentDocument().file.fullPath;
         var parsePromise = simpleDomain.exec('parse', path, fullPath, indentSize);
@@ -222,7 +232,7 @@ define(function (require, exports, module) {
 
             _formatSASS(indentChar, indentSize, function (err, res) {
                 if (err) {
-                    console.log(err)
+                    console.log(err);
                     formattedText = _formatCSS(unformattedText, indentChar, indentSize);
                     batchUpdate(formattedText, isSelection);
                 } else {
