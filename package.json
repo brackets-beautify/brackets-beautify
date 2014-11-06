@@ -32,6 +32,11 @@
         "main.js",
         "settings.json"
     ],
+       "i18n": [
+        "en", 
+        "fr",
+        "it"
+    ],
     "engines": {
         "brackets": ">=0.22.0"
     }
