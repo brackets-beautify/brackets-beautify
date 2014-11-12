@@ -25,7 +25,7 @@
 /*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
 /*global define */
 define({
-	  'BEAUTIFY': 'Formatar documento',
+    'BEAUTIFY': 'Formatear documento',
     'BEAUTIFY_ON_SAVE': 'Formato automatico al guardar',
     'FILE_ERROR': 'No se pudo determinar el tipo de archivo',
     'SASS_FORMAT': 'Ha ocurrido un error al formatear el archivo SASS',
