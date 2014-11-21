@@ -111,6 +111,23 @@ define(function (require, exports, module) {
      * @param {String} indentSize
      */
 
+    function _formatHandlebars(unformattedText, indentChar, indentSize) {
+        var options = {
+            indent_size: indentSize,
+            indent_char: indentChar,
+            indent_handlebars: true
+        };
+        var formattedText = html_beautify(unformattedText, $.extend(options, settings));
+        return formattedText;
+    }
+
+    /**
+     *
+     * @param {String} unformattedText
+     * @param {String} indentChar
+     * @param {String} indentSize
+     */
+
     function _formatCSS(unformattedText, indentChar, indentSize) {
         var formattedText = css_beautify(unformattedText, {
             indent_size: indentSize,
@@ -211,6 +228,11 @@ define(function (require, exports, module) {
         case 'javascript':
         case 'json':
             formattedText = _formatJavascript(unformattedText, indentChar, indentSize);
+            batchUpdate(formattedText, isSelection);
+            break;
+
+        case 'handlebars':
+            formattedText = _formatHandlebars(unformattedText, indentChar, indentSize);
             batchUpdate(formattedText, isSelection);
             break;
 
