@@ -275,9 +275,11 @@ define(function (require, exports, module) {
 
 
     function onSave(event, doc) {
-        if ((event.timeStamp - localStorage.getItem(COMMAND_TIMESTAMP)) > 1000) {
+        var currentTimestamp = Date.now();
+
+        if ((currentTimestamp - localStorage.getItem(COMMAND_TIMESTAMP)) > 1000) {
             format(true);
-            localStorage.setItem(COMMAND_TIMESTAMP, event.timeStamp);
+            localStorage.setItem(COMMAND_TIMESTAMP, currentTimestamp);
             CommandManager.execute(Commands.FILE_SAVE, {
                 doc: doc
             });
