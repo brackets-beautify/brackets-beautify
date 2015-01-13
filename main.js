@@ -111,6 +111,23 @@ define(function (require, exports, module) {
      * @param {String} indentSize
      */
 
+    function _formatHandlebars(unformattedText, indentChar, indentSize) {
+        var options = {
+            indent_size: indentSize,
+            indent_char: indentChar,
+            indent_handlebars: true
+        };
+        var formattedText = html_beautify(unformattedText, $.extend(options, settings));
+        return formattedText;
+    }
+
+    /**
+     *
+     * @param {String} unformattedText
+     * @param {String} indentChar
+     * @param {String} indentSize
+     */
+
     function _formatCSS(unformattedText, indentChar, indentSize) {
         var formattedText = css_beautify(unformattedText, {
             indent_size: indentSize,
@@ -214,6 +231,11 @@ define(function (require, exports, module) {
             batchUpdate(formattedText, isSelection);
             break;
 
+        case 'handlebars':
+            formattedText = _formatHandlebars(unformattedText, indentChar, indentSize);
+            batchUpdate(formattedText, isSelection);
+            break;
+
         case 'html':
         case 'php':
         case 'xml':
@@ -253,9 +275,11 @@ define(function (require, exports, module) {
 
 
     function onSave(event, doc) {
-        if ((event.timeStamp - localStorage.getItem(COMMAND_TIMESTAMP)) > 1000) {
+        var currentTimestamp = Date.now();
+
+        if (currentTimestamp === undefined || (currentTimestamp - localStorage.getItem(COMMAND_TIMESTAMP)) > 1000) {
             format(true);
-            localStorage.setItem(COMMAND_TIMESTAMP, event.timeStamp);
+            localStorage.setItem(COMMAND_TIMESTAMP, currentTimestamp);
             CommandManager.execute(Commands.FILE_SAVE, {
                 doc: doc
             });
