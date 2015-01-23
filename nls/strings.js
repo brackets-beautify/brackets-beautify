@@ -35,6 +35,8 @@ define(function (require, exports, module) {
     // TODO: dynamically populate the local prefix list below?
     module.exports = {
         root: true,
-        'fr': true
+        'fr': true,
+        'it': true
+        
     };
 });
