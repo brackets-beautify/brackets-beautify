@@ -288,10 +288,15 @@ define(function (require, exports, module) {
         beautifyPreferences.save();
     }
 
+	var commandBeautify = Strings.BEAUTIFY;
+	if (typeof(commandBeautify) == 'undefined') {
+		commandBeautify = 'Beautify';
+	}
+
     /**
      * File menu
      */
-    CommandManager.register('Beautify', COMMAND_ID, format);
+    CommandManager.register(commandBeautify, COMMAND_ID, format);
     var commandOnSave = CommandManager.register(Strings.BEAUTIFY_ON_SAVE, COMMAND_SAVE_ID, function () {
         toggle(this, !this.getChecked());
         if (this.getChecked()) {
@@ -302,7 +307,7 @@ define(function (require, exports, module) {
     /**
      * Contextual menu
      */
-    CommandManager.register('Beautify', CONTEXTUAL_COMMAND_ID, format);
+    CommandManager.register(commandBeautify, CONTEXTUAL_COMMAND_ID, format);
     var contextMenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU);
     contextMenu.addMenuItem(CONTEXTUAL_COMMAND_ID);
 
