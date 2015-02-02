@@ -27,7 +27,7 @@
 /*global define */
 define({
     'BEAUTIFY_ON_SAVE': 'Beautify beim Speichern',
-    'FILE_ERROR': 'Konnte Dateityp nicht ermitteln',
+    'FILE_ERROR': 'Dateityp konnte nicht ermittelt werden',
     'SASS_FORMAT': 'Beim Formatieren der SASS-Datei ist ein Fehler aufgetreten',
     'SASS_ERROR': 'Der Pfad zum sass-convert Programm muss angegeben werden'
 });
