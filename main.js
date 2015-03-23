@@ -1,5 +1,5 @@
+/*jslint indent: 4, nomen: true */
 /*global define, $, brackets, window, style_html, localStorage, console, alert */
-
 define(function (require, exports, module) {
 
     'use strict';
@@ -10,9 +10,9 @@ define(function (require, exports, module) {
         OLD_COMMAND_ID = 'beautify',
         COMMAND_SAVE_ID = COMMAND_ID + '.autosave',
         COMMAND_TIMESTAMP = COMMAND_ID + '-timeStamp',
-        CONTEXTUAL_COMMAND_ID = COMMAND_ID + 'Contextual';
-
-    var Menus = brackets.getModule('command/Menus'),
+        CONTEXTUAL_COMMAND_ID = COMMAND_ID + 'Contextual',
+        //
+        Menus = brackets.getModule('command/Menus'),
         AppInit = brackets.getModule('utils/AppInit'),
         Commands = brackets.getModule('command/Commands'),
         Editor = brackets.getModule('editor/Editor').Editor,
@@ -24,16 +24,16 @@ define(function (require, exports, module) {
         CommandManager = brackets.getModule('command/CommandManager'),
         ProjectManager = brackets.getModule('project/ProjectManager'),
         DocumentManager = brackets.getModule('document/DocumentManager'),
-        PreferencesManager = brackets.getModule('preferences/PreferencesManager');
-
-    /* Formatters */
-    var Strings = require('strings'),
+        PreferencesManager = brackets.getModule('preferences/PreferencesManager'),
+        // Formatters
+        Strings = require('strings'),
         js_beautify = require('thirdparty/js-beautify/js/lib/beautify').js_beautify,
         css_beautify = require('thirdparty/js-beautify/js/lib/beautify-css').css_beautify,
-        html_beautify = require('thirdparty/js-beautify/js/lib/beautify-html').html_beautify;
-
-    /* Variables */
-    var beautifyOnSave,
+        html_beautify = require('thirdparty/js-beautify/js/lib/beautify-html').html_beautify,
+        // Variables
+        contextMenu,
+        commandOnSave,
+        beautifyOnSave,
         settingsFileName = '.jsbeautifyrc',
         menu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU),
         settings = JSON.parse(require('text!settings.json')),
@@ -80,11 +80,12 @@ define(function (require, exports, module) {
      * @param {String} indentSize
      */
     function _formatJavascript(unformattedText, indentChar, indentSize) {
-        var options = {
-            indent_size: indentSize,
-            indent_char: indentChar
-        };
-        var formattedText = js_beautify(unformattedText, $.extend(options, settings));
+        var formattedText,
+            options = {
+                indent_size: indentSize,
+                indent_char: indentChar
+            };
+        formattedText = js_beautify(unformattedText, $.extend(options, settings));
         return formattedText;
     }
 
@@ -96,11 +97,12 @@ define(function (require, exports, module) {
      */
 
     function _formatHTML(unformattedText, indentChar, indentSize) {
-        var options = {
-            indent_size: indentSize,
-            indent_char: indentChar
-        };
-        var formattedText = html_beautify(unformattedText, $.extend(options, settings));
+        var formattedText,
+            options = {
+                indent_size: indentSize,
+                indent_char: indentChar
+            };
+        formattedText = html_beautify(unformattedText, $.extend(options, settings));
         return formattedText;
     }
 
@@ -130,7 +132,10 @@ define(function (require, exports, module) {
         if (indentChar === '\t') {
             indentSize = 't';
         }
-        var path = beautifyPreferences.get('sassConvertPath');
+        var fullPath,
+            simpleDomain,
+            parsePromise,
+            path = beautifyPreferences.get('sassConvertPath');
 
         if (!path) {
             // try old one
@@ -142,9 +147,9 @@ define(function (require, exports, module) {
             __debug(Strings.SASS_ERROR, 0); // Don't error on this
         }
 
-        var simpleDomain = new NodeDomain('sassformat', ExtensionUtils.getModulePath(module, 'node/SassFormatDomain'));
-        var fullPath = DocumentManager.getCurrentDocument().file.fullPath;
-        var parsePromise = simpleDomain.exec('parse', path, fullPath, indentSize);
+        simpleDomain = new NodeDomain('sassformat', ExtensionUtils.getModulePath(module, 'node/SassFormatDomain'));
+        fullPath = DocumentManager.getCurrentDocument().file.fullPath;
+        parsePromise = simpleDomain.exec('parse', path, fullPath, indentSize);
         parsePromise.done(function (res) {
             return callback(null, res);
         });
@@ -154,11 +159,15 @@ define(function (require, exports, module) {
     }
 
     function batchUpdate(formattedText, isSelection) {
-        var editor = EditorManager.getCurrentFullEditor();
-        var cursor = editor.getCursorPos();
-        var scroll = editor.getScrollPos();
-        var doc = DocumentManager.getCurrentDocument();
-        var selection = editor.getSelection();
+        var doc,
+            scroll,
+            cursor,
+            selection,
+            editor = EditorManager.getCurrentFullEditor();
+        cursor = editor.getCursorPos();
+        scroll = editor.getScrollPos();
+        doc = DocumentManager.getCurrentDocument();
+        selection = editor.getSelection();
         doc.batchOperation(function () {
             if (settings.git_happy) {
                 formattedText += '\n';
@@ -178,9 +187,18 @@ define(function (require, exports, module) {
      */
 
     function format(autoSave) {
-        var indentChar, indentSize, formattedText;
-        var unformattedText, isSelection = false;
-        var useTabs = Editor.getUseTabChar();
+        var doc,
+            editor,
+            fileType,
+            language,
+            selection,
+            indentChar,
+            indentSize,
+            selectedText,
+            formattedText,
+            unformattedText,
+            isSelection = false,
+            useTabs = Editor.getUseTabChar();
 
         __debug(settings, 0);
         if (useTabs) {
@@ -191,9 +209,9 @@ define(function (require, exports, module) {
             indentSize = Editor.getSpaceUnits();
         }
 
-        var editor = EditorManager.getCurrentFullEditor();
-        var selectedText = editor.getSelectedText();
-        var selection = editor.getSelection();
+        editor = EditorManager.getCurrentFullEditor();
+        selectedText = editor.getSelectedText();
+        selection = editor.getSelection();
 
         if (selectedText.length > 0) {
             isSelection = true;
@@ -202,9 +220,9 @@ define(function (require, exports, module) {
             unformattedText = DocumentManager.getCurrentDocument().getText();
         }
 
-        var doc = DocumentManager.getCurrentDocument();
-        var language = doc.getLanguage();
-        var fileType = language._id;
+        doc = DocumentManager.getCurrentDocument();
+        language = doc.getLanguage();
+        fileType = language._id;
 
         switch (fileType) {
 
@@ -218,6 +236,9 @@ define(function (require, exports, module) {
         case 'php':
         case 'xml':
         case 'ejs':
+        case 'tpl':
+        case 'hbs':
+        case 'handlebars':
             formattedText = _formatHTML(unformattedText, indentChar, indentSize);
             batchUpdate(formattedText, isSelection);
             break;
@@ -282,7 +303,7 @@ define(function (require, exports, module) {
 
     function toggle(command, fromCheckbox) {
         var newValue = (typeof fromCheckbox === 'undefined') ? beautifyOnSave : fromCheckbox;
-        $(DocumentManager)[newValue ? 'on' : 'off']('documentSaved', onSave);
+        DocumentManager[newValue ? 'on' : 'off']('documentSaved', onSave);
         command.setChecked(newValue);
         beautifyPreferences.set('on_save', newValue);
         beautifyPreferences.save();
@@ -292,7 +313,7 @@ define(function (require, exports, module) {
      * File menu
      */
     CommandManager.register('Beautify', COMMAND_ID, format);
-    var commandOnSave = CommandManager.register(Strings.BEAUTIFY_ON_SAVE, COMMAND_SAVE_ID, function () {
+    commandOnSave = CommandManager.register(Strings.BEAUTIFY_ON_SAVE, COMMAND_SAVE_ID, function () {
         toggle(this, !this.getChecked());
         if (this.getChecked()) {
             localStorage.setItem(COMMAND_TIMESTAMP, 0);
@@ -303,7 +324,7 @@ define(function (require, exports, module) {
      * Contextual menu
      */
     CommandManager.register('Beautify', CONTEXTUAL_COMMAND_ID, format);
-    var contextMenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU);
+    contextMenu = Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU);
     contextMenu.addMenuItem(CONTEXTUAL_COMMAND_ID);
 
     toggle(commandOnSave);
@@ -314,13 +335,13 @@ define(function (require, exports, module) {
 
     AppInit.appReady(function () {
 
-        $(DocumentManager).on('documentRefreshed.beautify', function (e, document) {
+        DocumentManager.on('documentRefreshed.beautify', function (e, document) {
             if (document.file.fullPath === ProjectManager.getProjectRoot().fullPath + settingsFileName) {
                 loadConfig();
             }
         });
 
-        $(ProjectManager).on('projectOpen.beautify', function () {
+        ProjectManager.on('projectOpen.beautify', function () {
             loadConfig();
         });
 
