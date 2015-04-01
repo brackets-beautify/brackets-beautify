@@ -218,6 +218,7 @@ define(function (require, exports, module) {
         case 'php':
         case 'xml':
         case 'ejs':
+        case 'handlebars':
             formattedText = _formatHTML(unformattedText, indentChar, indentSize);
             batchUpdate(formattedText, isSelection);
             break;
