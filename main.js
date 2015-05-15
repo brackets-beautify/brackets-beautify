@@ -220,9 +220,10 @@ define(function (require, exports, module) {
         case 'ejs':
         case 'handlebars':
             formattedText = _formatHTML(unformattedText, indentChar, indentSize);
-            // for php files, "new" => "n ew", "array" => "a rray" after _formatHTML
-            formattedText = formattedText.replace("n ew", "new");
-            formattedText = formattedText.replace("a rray", "array");
+            // for php files, remove unwanted white space ex. "= new" => "=n ew", "= array" => "=a rray" after _formatHTML
+            formattedText = formattedText.replace(/=. /g, function (a, b) {
+                return a.trim();
+            });
             batchUpdate(formattedText, isSelection);
             break;
 
