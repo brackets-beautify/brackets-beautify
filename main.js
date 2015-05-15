@@ -220,6 +220,9 @@ define(function (require, exports, module) {
         case 'ejs':
         case 'handlebars':
             formattedText = _formatHTML(unformattedText, indentChar, indentSize);
+            // for php files, "new" => "n ew", "array" => "a rray" after _formatHTML
+            formattedText = formattedText.replace("n ew", "new");
+            formattedText = formattedText.replace("a rray", "array");
             batchUpdate(formattedText, isSelection);
             break;
 
