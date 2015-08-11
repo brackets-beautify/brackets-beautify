@@ -283,7 +283,7 @@ define(function (require, exports, module) {
 
     function toggle(command, fromCheckbox) {
         var newValue = (typeof fromCheckbox === 'undefined') ? beautifyOnSave : fromCheckbox;
-        $(DocumentManager)[newValue ? 'on' : 'off']('documentSaved', onSave);
+        DocumentManager[newValue ? 'on' : 'off']('documentSaved', onSave);
         command.setChecked(newValue);
         beautifyPreferences.set('on_save', newValue);
         beautifyPreferences.save();
@@ -315,13 +315,13 @@ define(function (require, exports, module) {
 
     AppInit.appReady(function () {
 
-        $(DocumentManager).on('documentRefreshed.beautify', function (e, document) {
+        DocumentManager.on('documentRefreshed.beautify', function (e, document) {
             if (document.file.fullPath === ProjectManager.getProjectRoot().fullPath + settingsFileName) {
                 loadConfig();
             }
         });
 
-        $(ProjectManager).on('projectOpen.beautify', function () {
+        ProjectManager.on('projectOpen.beautify', function () {
             loadConfig();
         });
 
