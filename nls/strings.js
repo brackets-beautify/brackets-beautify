@@ -38,6 +38,7 @@ define(function (require, exports, module) {
         'fr': true,
         'de': true,
         'ja': true,
-        'es': true
+        'es': true,
+        'it': true
     };
 });
