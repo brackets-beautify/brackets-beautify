@@ -2,6 +2,7 @@ brackets-beautify
 =================
 
 Looking for maintainers for this project.  If you're interested please message me.  Thanks!
+===
 
 [Brackets](http://brackets.io/) Extension that formats open HTML, CSS, and JavaScript files using [js-beautify](https://github.com/einars/js-beautify).
 
