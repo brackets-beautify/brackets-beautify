@@ -16,6 +16,36 @@ Search for "Beautify" in [Extension Manager](https://github.com/adobe/brackets/w
 
 Download zip and extract into arbitrary directory (or clone source files), then move the folder to the extensions folder (you can open this folder by clicking "Help > Show Extensions Folder" menu).
 
+Options
+---
+To edit the options for brackets-beautify, open `Brackets > Preferences...` and select the file `brackets.json`. In this JSON file you can add the following options to the general section or to a language specific section:
+
+### me.drewh.jsbeautify.on_save
+Set to `true` to automatically beautify the code before saving a file. The default is to not automatically beautify code upon saving.
+
+### me.drewh.jsbeautify.options
+Add any [js-beautify options](https://www.npmjs.com/package/js-beautify#options) to overrule the defaults.
+
+Example `brackets.json` exerpt with specific formatting rules for javascript:
+
+    {
+        ...
+        "language": {
+            "javascript": {
+                "me.drewh.jsbeautify.on_save": true,
+                "me.drewh.jsbeautify.options": {
+                    "brace_style": "collapse",
+                    "break_chained_methods": false,
+                    "indent_size": 2,
+                    "indent_char": " ",
+                    "indent_level": 0,
+                    "indent_with_tabs": false,
+                }
+            }
+        },
+        ...
+    }
+
 Usage
 ---
 

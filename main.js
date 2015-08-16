@@ -89,7 +89,9 @@ define(function (require, exports, module) {
             indent_size: indentSize,
             indent_char: indentChar
         };
-        var formattedText = js_beautify(unformattedText, $.extend(options, settings));
+        var prefsOptions = beautifyPreferences.get('options') || {};
+        prefsOptions = $.extend(options, prefsOptions);
+        var formattedText = js_beautify(unformattedText, $.extend(prefsOptions, settings));
         return formattedText;
     }
 
@@ -105,7 +107,9 @@ define(function (require, exports, module) {
             indent_size: indentSize,
             indent_char: indentChar
         };
-        var formattedText = html_beautify(unformattedText, $.extend(options, settings));
+        var prefsOptions = beautifyPreferences.get('options') || {};
+        prefsOptions = $.extend(options, prefsOptions);
+        var formattedText = html_beautify(unformattedText, $.extend(prefsOptions, settings));
         return formattedText;
     }
 
@@ -117,10 +121,13 @@ define(function (require, exports, module) {
      */
 
     function _formatCSS(unformattedText, indentChar, indentSize) {
-        var formattedText = css_beautify(unformattedText, {
+        var options = {
             indent_size: indentSize,
             indent_char: indentChar
-        });
+        };
+        var prefsOptions = beautifyPreferences.get('options') || {};
+        prefsOptions = $.extend(options, prefsOptions);
+        var formattedText = css_beautify(unformattedText, prefsOptions);
         return formattedText;
     }
 
