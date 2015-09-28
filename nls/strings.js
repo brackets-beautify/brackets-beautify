@@ -39,6 +39,7 @@ define(function (require, exports, module) {
         'de': true,
         'ja': true,
         'es': true,
-        'it': true
+        'it': true,
+        'zh-cn': true
     };
 });
