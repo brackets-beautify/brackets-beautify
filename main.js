@@ -117,10 +117,11 @@ define(function (require, exports, module) {
      */
 
     function _formatCSS(unformattedText, indentChar, indentSize) {
-        var formattedText = css_beautify(unformattedText, {
+        var options = {
             indent_size: indentSize,
             indent_char: indentChar
-        });
+        };
+        var formattedText = css_beautify(unformattedText, $.extend(options, settings));
         return formattedText;
     }
 
@@ -273,10 +274,11 @@ define(function (require, exports, module) {
 
     function loadConfig() {
         var settingsFile = FileSystem.getFileForPath(ProjectManager.getProjectRoot().fullPath + settingsFileName);
+        settings = JSON.parse(require('text!settings.json')); // reset settings to default
         settingsFile.read(function (err, content) {
             if (content) {
                 try {
-                    settings = JSON.parse(content);
+                    settings = $.extend(settings, JSON.parse(content)); // merge project settings with default
                     __debug('settings loaded' + settings, 0);
                 } catch (e) {
                     __debug('error parsing ' + settingsFile + '. Details: ' + e);
