@@ -274,10 +274,11 @@ define(function (require, exports, module) {
 
     function loadConfig() {
         var settingsFile = FileSystem.getFileForPath(ProjectManager.getProjectRoot().fullPath + settingsFileName);
+        settings = JSON.parse(require('text!settings.json')); // reset settings to default
         settingsFile.read(function (err, content) {
             if (content) {
                 try {
-                    settings = JSON.parse(content);
+                    settings = $.extend(settings, JSON.parse(content)); // merge project settings with default
                     __debug('settings loaded' + settings, 0);
                 } catch (e) {
                     __debug('error parsing ' + settingsFile + '. Details: ' + e);
