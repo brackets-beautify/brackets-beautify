@@ -197,8 +197,11 @@ define(function (require, exports, module) {
             formattedText = _formatJavascript(unformattedText, indentChar, indentSize);
             batchUpdate(formattedText, isSelection);
             break;
-        case 'html':
         case 'php':
+            if (autoSave) {
+                break;
+            }
+        case 'html':
         case 'xml':
         case 'ejs':
             formattedText = _formatHTML(unformattedText, indentChar, indentSize);
