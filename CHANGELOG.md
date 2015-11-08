@@ -8,6 +8,7 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 - Enable use of nested settings from `.jsbeautifyrc`
 - Provide settings to *css_beautify*
 - Format SVG as HTML
+- Define preference with description
 
 ### Changed
 - Only change document if beautified text looks different
@@ -17,8 +18,8 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 - Fake French translation
 - `git_happy` option as it is identical to `end_with_newline`
 
-## Fixed
-- LivePreview duplication (see [#14](https://github.com/Hirse/brackets-beautify/issues/14))
+### Fixed
+- LivePreview duplication (see [#49](https://github.com/brackets-beautify/brackets-beautify/issues/49))
 - Key Binding on Linux
 
 

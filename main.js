@@ -4,6 +4,22 @@ define(function (require) {
     var PREFIX = 'bb.beautify';
     var COMMAND_ID = PREFIX + '.beautify';
     var COMMAND_SAVE_ID = PREFIX + '.autosave';
+    var PREF_SAVE_ID = 'onSave';
+    var SETTINGS_FILE_NAME = '.jsbeautifyrc';
+    var KEY_BINDINGS = [
+        {
+            key: 'Ctrl-Shift-L',
+            platform: 'win'
+        }, {
+            key: 'Ctrl-Alt-B',
+            platform: 'win'
+        }, {
+            key: 'Cmd-Shift-L',
+            platform: 'mac'
+        }, {
+            key: 'Ctrl-Alt-B'
+        }
+    ];
 
     /* beautify preserve:start */
     var CommandManager     = brackets.getModule('command/CommandManager');
@@ -30,30 +46,9 @@ define(function (require) {
         html: require('thirdparty/beautify-html').html_beautify,
         sass: require('external/sass/beautify').beautify
     };
-
-    var settingsFileName = '.jsbeautifyrc';
     var settings = JSON.parse(require('text!default.jsbeautifyrc'));
-    var beautifyPrefs = PreferencesManager.getExtensionPrefs(PREFIX);
-    var keyBindings = [
-        {
-            key: 'Ctrl-Shift-L',
-            platform: 'win'
-        }, {
-            key: 'Ctrl-Alt-B',
-            platform: 'win'
-        }, {
-            key: 'Cmd-Shift-L',
-            platform: 'mac'
-        }, {
-            key: 'Ctrl-Alt-B'
-        }
-    ];
 
-    var beautifyOnSave = beautifyPrefs.get('onSave') || false;
-    if (!beautifyOnSave) {
-        beautifyPrefs.set('onSave', false);
-        beautifyPrefs.save();
-    }
+    var prefs = PreferencesManager.getExtensionPrefs(PREFIX);
 
     function batchUpdate(formattedText, range) {
         var editor = EditorManager.getCurrentFullEditor();
@@ -153,7 +148,7 @@ define(function (require) {
                 batchUpdate(formattedText, range);
             }
         } else {
-            beautifiers[beautifier](unformattedText, options, beautifyPrefs, function (formattedText) {
+            beautifiers[beautifier](unformattedText, options, function (formattedText) {
                 if (formattedText !== unformattedText) {
                     batchUpdate(formattedText, range);
                 }
@@ -166,7 +161,7 @@ define(function (require) {
             return;
         }
         var context = PreferencesManager._buildContext(doc.file.fullPath, doc.getLanguage().getId());
-        if (beautifyPrefs.get('onSave', context)) {
+        if (prefs.get(PREF_SAVE_ID, context)) {
             doc.addRef();
             doc.__beautifySaving = true;
             format(true);
@@ -183,7 +178,7 @@ define(function (require) {
 
     function loadConfig(settingsFile) {
         if (!settingsFile) {
-            settingsFile = FileSystem.getFileForPath(ProjectManager.getProjectRoot().fullPath + settingsFileName);
+            settingsFile = FileSystem.getFileForPath(ProjectManager.getProjectRoot().fullPath + SETTINGS_FILE_NAME);
         }
         settingsFile.read(function (err, content) {
             if (err === FileSystemError.NOT_FOUND) {
@@ -199,39 +194,43 @@ define(function (require) {
     }
 
     function loadConfigOnChange(e, document) {
-        if (document.file.fullPath === ProjectManager.getProjectRoot().fullPath + settingsFileName) {
+        if (document.file.fullPath === ProjectManager.getProjectRoot().fullPath + SETTINGS_FILE_NAME) {
             loadConfig(document.file);
         }
     }
 
-    function toggle(command, fromCheckbox) {
-        var newValue = (typeof fromCheckbox === 'undefined') ? beautifyOnSave : fromCheckbox;
-        DocumentManager[newValue ? 'on' : 'off']('documentSaved', onSave);
-        command.setChecked(newValue);
-        beautifyPrefs.set('onSave', newValue);
-        beautifyPrefs.save();
+    function changePref() {
+        CommandManager.get(COMMAND_SAVE_ID).setChecked(prefs.get(PREF_SAVE_ID));
     }
 
+    function executeCommand() {
+        CommandManager.get(COMMAND_SAVE_ID).setChecked(!CommandManager.get(COMMAND_SAVE_ID).getChecked());
+        prefs.set(PREF_SAVE_ID, CommandManager.get(COMMAND_SAVE_ID).getChecked());
+    }
+
+    prefs.definePreference(PREF_SAVE_ID, 'boolean', false, {
+        name: Strings.BEAUTIFY_ON_SAVE,
+        description: Strings.BEAUTIFY_ON_SAVE_DESC
+    }).on('change', changePref);
+
     CommandManager.register(Strings.BEAUTIFY, COMMAND_ID, format);
-    var commandOnSave = CommandManager.register(Strings.BEAUTIFY_ON_SAVE, COMMAND_SAVE_ID, function () {
-        toggle(this, !this.getChecked());
-    });
-    toggle(commandOnSave);
+    CommandManager.register(Strings.BEAUTIFY_ON_SAVE, COMMAND_SAVE_ID, executeCommand);
 
     var editMenu = Menus.getMenu(Menus.AppMenuBar.EDIT_MENU);
     editMenu.addMenuDivider();
-    editMenu.addMenuItem(COMMAND_ID, keyBindings);
+    editMenu.addMenuItem(COMMAND_ID, KEY_BINDINGS);
     editMenu.addMenuItem(COMMAND_SAVE_ID);
     Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuItem(COMMAND_ID);
 
     var jsonLanguage = LanguageManager.getLanguage('json');
-    jsonLanguage.addFileExtension(settingsFileName);
-    jsonLanguage.addFileName(settingsFileName);
+    jsonLanguage.addFileExtension(SETTINGS_FILE_NAME);
+    jsonLanguage.addFileName(SETTINGS_FILE_NAME);
 
     AppInit.appReady(function () {
-        DocumentManager.on('documentSaved.beautify', loadConfigOnChange);
-        DocumentManager.on('documentRefreshed.beautify', loadConfigOnChange);
-        ProjectManager.on('projectOpen.beautify', function () {
+        DocumentManager.on('documentSaved.beautify', onSave);
+        DocumentManager.on('documentSaved.beautifyOptions', loadConfigOnChange);
+        DocumentManager.on('documentRefreshed.beautifyOptions', loadConfigOnChange);
+        ProjectManager.on('projectOpen.beautifyOptions', function () {
             loadConfig();
         });
         loadConfig();
