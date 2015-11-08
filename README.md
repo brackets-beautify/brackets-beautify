@@ -22,7 +22,7 @@ Use the menu entry `Edit > Beautify on Save` or the more [advanced settings][Bea
 ### Configuration
 #### Beautifier Options
 Brackets Beautify supports the same [options][js-beautify options] as [js-beautify][js-beautify] with the exception of indentation-based options (`indent_size`, `indent_char`, and `indent_with_tabs`) which are taken from the current settings in Brackets.
-The options can be specified in a `.jsbeautifyrc` file on project level.
+The options can be specified in a `.jsbeautifyrc` file on project level and will be merged with the default.
 The default is defined in `default.jsbeautifyrc` and looks like this:
 ```json
 {
@@ -31,7 +31,6 @@ The default is defined in `default.jsbeautifyrc` and looks like this:
         "indent_level": 0,
         "preserve_newlines": true,
         "max_preserve_newlines": 10,
-        "jslint_happy": true,
         "space_after_anon_function": true,
         "brace_style": "collapse",
         "keep_array_indentation": true,
@@ -67,9 +66,9 @@ The default is defined in `default.jsbeautifyrc` and looks like this:
 #### File Options for Beautify on Save
 Brackets Beautify leverages [Brackets preferences][Brackets preferences], which means that you can specify per project settings by defining a `.brackets.json` in the root directory of your project. With Brackets preferences you can even define per file settings, which is really handy when dealing with third party libraries or minified resources.
 
-Brackets Beautify also support per language settings, which enables you to enable/disabled `Beautify on save` for your documents using the Brackets language layer.
+Brackets Beautify also support per language settings, which enables you to enable/disabled `Beautify on Save` for your documents using the Brackets language layer.
 
-The sample `.brackets.json` below generally enables `Beautify on save` and disables it for any JavaScript file in `thirdparty`, any JavaScript file whose filename contains `min` and any PHP file.
+The sample `.brackets.json` below generally enables `Beautify on Save` and disables it for any JavaScript file in `thirdparty`, any JavaScript file whose filename contains `min` and any PHP file.
 ```json
 {
     "bb.beautify.onSave": true,

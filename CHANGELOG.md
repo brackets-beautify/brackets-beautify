@@ -13,6 +13,7 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Only change document if beautified text looks different
 - Turned on `end_with_newline` option by default
+- Merge options file with default
 
 ### Removed
 - Fake French translation

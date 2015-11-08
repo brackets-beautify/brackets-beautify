@@ -5,7 +5,7 @@ define(function (require) {
     var COMMAND_ID = PREFIX + '.beautify';
     var COMMAND_SAVE_ID = PREFIX + '.autosave';
     var PREF_SAVE_ID = 'onSave';
-    var SETTINGS_FILE_NAME = '.jsbeautifyrc';
+    var OPTIONS_FILE_NAME = '.jsbeautifyrc';
     var KEY_BINDINGS = [
         {
             key: 'Ctrl-Shift-L',
@@ -46,7 +46,8 @@ define(function (require) {
         html: require('thirdparty/beautify-html').html_beautify,
         sass: require('external/sass/beautify').beautify
     };
-    var settings = JSON.parse(require('text!default.jsbeautifyrc'));
+    var defaultOptions = JSON.parse(require('text!default.jsbeautifyrc'));
+    var options;
 
     var prefs = PreferencesManager.getExtensionPrefs(PREFIX);
 
@@ -100,17 +101,17 @@ define(function (require) {
 
         var unformattedText;
         var editor = EditorManager.getCurrentFullEditor();
-        var options = $.extend({}, settings[beautifier] || settings);
+        var currentOptions = $.extend({}, options[beautifier] || options);
         if (Editor.getUseTabChar()) {
-            options.indent_with_tabs = true;
+            currentOptions.indent_with_tabs = true;
         } else {
-            options.indent_size = Editor.getSpaceUnits();
-            options.indent_char = ' ';
+            currentOptions.indent_size = Editor.getSpaceUnits();
+            currentOptions.indent_char = ' ';
         }
         var range;
         if (editor.hasSelection()) {
-            options.indentation_level = editor.getSelection().start.ch;
-            options.end_with_newline = false;
+            currentOptions.indentation_level = editor.getSelection().start.ch;
+            currentOptions.end_with_newline = false;
             unformattedText = editor.getSelectedText();
             range = editor.getSelection();
         } else {
@@ -138,17 +139,17 @@ define(function (require) {
                             ch: (match[1] + match[2]).length - (match[1] + match[2]).lastIndexOf('\n') - 1
                         }
                     };
-                    options.end_with_newline = false;
+                    currentOptions.end_with_newline = false;
                 }
             }
         }
         if (!externalBeautifier) {
-            var formattedText = beautifiers[beautifier](unformattedText, options);
+            var formattedText = beautifiers[beautifier](unformattedText, currentOptions);
             if (formattedText !== unformattedText) {
                 batchUpdate(formattedText, range);
             }
         } else {
-            beautifiers[beautifier](unformattedText, options, function (formattedText) {
+            beautifiers[beautifier](unformattedText, currentOptions, function (formattedText) {
                 if (formattedText !== unformattedText) {
                     batchUpdate(formattedText, range);
                 }
@@ -176,25 +177,25 @@ define(function (require) {
         }
     }
 
-    function loadConfig(settingsFile) {
-        if (!settingsFile) {
-            settingsFile = FileSystem.getFileForPath(ProjectManager.getProjectRoot().fullPath + SETTINGS_FILE_NAME);
+    function loadConfig(optionsFile) {
+        if (!optionsFile) {
+            optionsFile = FileSystem.getFileForPath(ProjectManager.getProjectRoot().fullPath + OPTIONS_FILE_NAME);
         }
-        settingsFile.read(function (err, content) {
+        optionsFile.read(function (err, content) {
             if (err === FileSystemError.NOT_FOUND) {
                 return;
             }
             try {
-                settings = JSON.parse(content);
+                options = $.extend(true, {}, defaultOptions, JSON.parse(content));
             } catch (e) {
-                console.error('Brackets Beautify - Error parsing options (' + settingsFile.fullPath + '). Using default.');
-                return;
+                console.error('Brackets Beautify - Error parsing options (' + optionsFile.fullPath + '). Using default.');
+                options = defaultOptions;
             }
         });
     }
 
     function loadConfigOnChange(e, document) {
-        if (document.file.fullPath === ProjectManager.getProjectRoot().fullPath + SETTINGS_FILE_NAME) {
+        if (document.file.fullPath === ProjectManager.getProjectRoot().fullPath + OPTIONS_FILE_NAME) {
             loadConfig(document.file);
         }
     }
@@ -223,8 +224,8 @@ define(function (require) {
     Menus.getContextMenu(Menus.ContextMenuIds.EDITOR_MENU).addMenuItem(COMMAND_ID);
 
     var jsonLanguage = LanguageManager.getLanguage('json');
-    jsonLanguage.addFileExtension(SETTINGS_FILE_NAME);
-    jsonLanguage.addFileName(SETTINGS_FILE_NAME);
+    jsonLanguage.addFileExtension(OPTIONS_FILE_NAME);
+    jsonLanguage.addFileName(OPTIONS_FILE_NAME);
 
     AppInit.appReady(function () {
         DocumentManager.on('documentSaved.beautify', onSave);
