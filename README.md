@@ -1,80 +1,136 @@
-brackets-beautify
-=================
+# Brackets Beautify
+[Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.5.10][js-beautify version].
 
-Looking for maintainers for this project.  If you're interested please message me.  Thanks!
-===
+## Installation
+### Latest Release
+To install the latest _release_ of this extension use the built-in Brackets [Extension Manager][Brackets Extension Manager] which downloads the extension from the [extension registry][Brackets Extension Registry].
 
-[Brackets](http://brackets.io/) Extension that formats open HTML, CSS, and JavaScript files using [js-beautify](https://github.com/einars/js-beautify).
+### Latest Commit
+To install the latest _commit_ of this extension use the built-in Brackets [Extension Manager][Brackets Extension Manager] which has a function to `Install from URL...` using this link:
+```
+https://github.com/brackets-beautify/brackets-beautify/archive/master.zip
+```
 
-Compatible with  Sprint 22 and above.
-
-Installation
----
-Search for "Beautify" in [Extension Manager](https://github.com/adobe/brackets/wiki/Brackets-Extensions), then click on `Install` for Beautify by Drew Hamlett.
-
-### Alternative Install
-
-Download zip and extract into arbitrary directory (or clone source files), then move the folder to the extensions folder (you can open this folder by clicking "Help > Show Extensions Folder" menu).
-
-Usage
----
-
-`Edit > Beautify` menu or `Cmd-Shift-L(Mac) / Ctrl-Shift-L(Win)` key.
-
-SASS Formatting
----
-
-You need to supply an absolute path to the sass-convert executble for SASS formatting to work.
-
-+ Install [SASS Installation website](http://sass-lang.com/install)
-+ Get absolute path to executable
-
-On MacOSX you can go into terminal and type `which sass-convert`
-
-Since I use rbenv for manageing Ruby versions it gave me this.
-`/Users/drewh/.rbenv/shims/sass-convert`
-
-If you use system Ruby, when you do `sudo gem install sass` your path will be something like `/usr/bin/sass-convert`
-
-On Windows your path will be something similiar to this.
-`C:\\Ruby193\\bin\\sass-convert.bat`
-
-+ Now go open Brackets and go to `Debug > Open Preferences File`
+## Usage
+Brackets Beautify can be run manually on the whole file or on a selection.
+Use the menu entry `Edit > Beautify`, the context-menu entry `Beautify`, or one of the keyboard shortcuts `Ctrl-Alt-B` (Windows/Linux), `Ctrl-Shift-L` (Windows), `Cmd-Shift-L` (Mac), or [define your own][Beautify User Key Map].
 
 
-It will look something like this.
+Alternatively it can be enabled to run automatically on save.
+Use the menu entry `Edit > Beautify on Save` or the more [advanced settings][Beautify Beautify on Save] to activate.
 
-```js
+### Configuration
+#### Beautifier Options
+Brackets Beautify supports the same [options][js-beautify options] as [js-beautify][js-beautify] with the exception of indentation-based options (`indent_size`, `indent_char`, and `indent_with_tabs`) which are taken from the current settings in Brackets.
+The options can be specified in a `.jsbeautifyrc` file on project level.
+The default is defined in `default.jsbeautifyrc` and looks like this:
+```json
 {
-    "useTabChar": false,
-    "tabSize": 2,
-    "spaceUnits": 2,
-    "closeBrackets": true,
-    "showLineNumbers": true,
-    "styleActiveLine": false,
-    "wordWrap": false,
-    "linting.enabled": true,
-    "linting.collapsed": false,
-    "quickview.enabled": true
+    "js": {
+        "eol": "\n",
+        "indent_level": 0,
+        "preserve_newlines": true,
+        "max_preserve_newlines": 10,
+        "jslint_happy": true,
+        "space_after_anon_function": true,
+        "brace_style": "collapse",
+        "keep_array_indentation": true,
+        "keep_function_indentation": false,
+        "space_before_conditional": true,
+        "break_chained_methods": false,
+        "eval_code": false,
+        "unescape_strings": false,
+        "wrap_line_length": 0,
+        "wrap_attributes": "auto",
+        "end_with_newline": true
+    },
+    "css": {
+        "eol": "\n",
+        "end_with_newline": true,
+        "selector_separator_newline": true,
+        "newline_between_rules": true
+    },
+    "html": {
+        "eol": "\n",
+        "end_with_newline": true,
+        "preserve_newlines": true,
+        "max_preserve_newlines": 10,
+        "indent_inner_html": false,
+        "brace_style": "collapse",
+        "indent_scripts": "normal",
+        "wrap_line_length": 0,
+        "wrap_attributes": "auto"
+    }
 }
 ```
 
+#### File Options for Beautify on Save
+Brackets Beautify leverages [Brackets preferences][Brackets preferences], which means that you can specify per project settings by defining a `.brackets.json` in the root directory of your project. With Brackets preferences you can even define per file settings, which is really handy when dealing with third party libraries or minified resources.
 
-Now add ```"beautify.sassConvertPath": "/Users/drewh/.rbenv/shims/sass-convert"``` at the bottom.  Change the path name to the path all the way to executable.  The upcoming version will use ```me.drewh.jsbeautify.sassConvertPath``` as the key.
+Brackets Beautify also support per language settings, which enables you to enable/disabled `Beautify on save` for your documents using the Brackets language layer.
 
-You will now be able to format scss files.
+The sample `.brackets.json` below generally enables `Beautify on save` and disables it for any JavaScript file in `thirdparty`, any JavaScript file whose filename contains `min` and any PHP file.
+```json
+{
+    "bb.beautify.onSave": true,
+    "path": {
+        "thirdparty/**.js": {
+            "bb.beautify.onSave": false
+        },
+        "**min**.js": {
+            "bb.beautify.onSave": false
+        }
+    },
+    "language": {
+        "php": {
+            "bb.beautify.onSave": false
+        }
+    }
+}
+```
 
-For windows add  `"beautify.sassConvertPath": "C:\\Ruby193\\bin\\sass-convert.bat"`
+#### User Key Map for Beautify
+Open the `keymap.json` with the menu entry `Debug > Open User Key Map` and add an _overrides_ entry.  
+For example:
+```js
+{
+    "documentation": "https://github.com/adobe/brackets/wiki/User-Key-Bindings",
+    "overrides": {
+        "Ctrl-Alt-F": "bb.beautify.beautify"
+    }
+}
+```
 
-Contributing
----
+## External formatters
+### SASS
+You need to supply an absolute path to the `sass-convert` executable for SASS formatting to work.
 
-For any pull requesets dealing with the actual formatting or the source in beautify-css.js, beautify.js and beautify-html.js, please send to:
+- Install [SASS][SASS Install]
+- Get the absolute path to the executable  
+  Some example paths:
+  - On MacOSX  
+    Using *rbenv*: `/Users/<USER>/.rbenv/shims/sass-convert`  
+    Using system Ruby (`sudo gem install sass`): `/usr/bin/sass-convert`
+  - On Windows: `C:\\Ruby193\\bin\\sass-convert.bat`
+- Open the Brackets settings file and set the entry `bb.beautify.external.sass` to the path value.
 
-https://github.com/einars/js-beautify/issues
 
+## Issues
+Brackets Beautify uses [js-beautify][js-beautify] to beautify files and is therefore limited to its capabilities.
+For any issues concerning the actual formatting please refer to the [js-beautify issues][js-beautify issues].
 
+## License
+Brackets Beautify is licensed under the [MIT license][MIT]. [js-beautify][js-beautify] is also licensed under the MIT license.
 
-
-
-
+[Brackets]: http://brackets.io
+[Brackets Extension Manager]: https://github.com/adobe/brackets/wiki/Brackets-Extensions
+[Brackets Extension Registry]: https://brackets-registry.aboutweb.com
+[Brackets preferences]: https://github.com/adobe/brackets/wiki/How-to-Use-Brackets#preferences
+[Beautify User Key Map]: https://github.com/brackets-beautify/brackets-beautify#user-key-map-for-beautify
+[Beautify Beautify on Save]: https://github.com/brackets-beautify/brackets-beautify#file-options-for-beautify-on-save
+[js-beautify]: https://github.com/beautify-web/js-beautify
+[js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v1510
+[js-beautify issues]: https://github.com/beautify-web/js-beautify/issues
+[js-beautify options]: https://github.com/beautify-web/js-beautify#options
+[SASS Install]: http://sass-lang.com/install
+[MIT]: http://opensource.org/licenses/MIT

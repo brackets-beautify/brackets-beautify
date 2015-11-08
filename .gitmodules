@@ -1,3 +1,0 @@
-[submodule "thirdparty/js-beautify"]
-	path = thirdparty/js-beautify
-	url = git://github.com/beautify-web/js-beautify.git
