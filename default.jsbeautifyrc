@@ -1,0 +1,36 @@
+{
+    "js": {
+        "eol": "\n",
+        "indent_level": 0,
+        "preserve_newlines": true,
+        "max_preserve_newlines": 10,
+        "space_after_anon_function": true,
+        "brace_style": "collapse",
+        "keep_array_indentation": true,
+        "keep_function_indentation": false,
+        "space_before_conditional": true,
+        "break_chained_methods": false,
+        "eval_code": false,
+        "unescape_strings": false,
+        "wrap_line_length": 0,
+        "wrap_attributes": "auto",
+        "end_with_newline": true
+    },
+    "css": {
+        "eol": "\n",
+        "end_with_newline": true,
+        "selector_separator_newline": true,
+        "newline_between_rules": true
+    },
+    "html": {
+        "eol": "\n",
+        "end_with_newline": true,
+        "preserve_newlines": true,
+        "max_preserve_newlines": 10,
+        "indent_inner_html": false,
+        "brace_style": "collapse",
+        "indent_scripts": "normal",
+        "wrap_line_length": 0,
+        "wrap_attributes": "auto"
+    }
+}

@@ -1,33 +1,12 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Matthieu Lassalvy <malas34.github@gmail.com>
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- */
-// English - root strings
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define */
 define({
-    'BEAUTIFY_ON_SAVE': 'Beautify on save',
-    'FILE_ERROR': 'Could not determine file type',
-    'SASS_FORMAT': 'An error occurred formatting the SASS file',
-    'SASS_ERROR': 'You need to provide a path to the sass-convert program'
+    BEAUTIFY: 'Beautify',
+    BEAUTIFY_ON_SAVE: 'Beautify on Save',
+    BEAUTIFY_ON_SAVE_DESC: 'true to Beautify file on Save',
+    UNSUPPORTED_TITLE: 'Unsupported Language',
+    UNSUPPORTED_MESSAGE: 'This language is not supported.\n Supported languages are JavaScript, JSON, HTML, XML, SVG, HTML in PHP, Embedded JavaScript, Handlebars, CSS, SCSS, and LESS.',
+
+    SASS_PREF_NAME: 'Path to sass-convert',
+    SASS_PREF_DESC: 'Absolute path to sass-convert',
+    SASS_FORMAT: 'An error occurred formatting the SASS file',
+    SASS_ERROR: 'You need to provide a path to the sass-convert program'
 });

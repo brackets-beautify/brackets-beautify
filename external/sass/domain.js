@@ -1,5 +1,6 @@
-(function () {
+/* jshint node: true */
 
+(function () {
     'use strict';
 
     // "beautify.sassConvertPath": "/Users/drewh/.rbenv/shims/sass-convert"
@@ -7,7 +8,6 @@
     var exec = require('child_process').exec;
 
     function cmdFormat(sassPath, filePath, indentSize, callback) {
-        console.log(filePath);
         exec(sassPath + ' --indent ' + indentSize + ' -F scss -T scss ' + filePath, function (err, out, stderr) {
             return callback(err, out, stderr);
         });
@@ -26,17 +26,17 @@
             cmdFormat,
             true,
             'SASS format', [{
-                name: "sassPath",
-                type: "string",
-                description: "Path to sass-convert program"
+                name: 'sassPath',
+                type: 'string',
+                description: 'Path to sass-convert program'
             }, {
-                name: "filePath",
-                type: "string",
-                description: "Path to file."
+                name: 'filePath',
+                type: 'string',
+                description: 'Path to file.'
             }, {
-                name: "indentSize",
-                type: "string",
-                description: "Indention size or tab character"
+                name: 'indentSize',
+                type: 'string',
+                description: 'Indention size or tab character'
             }], {}
         );
     }

@@ -1,33 +1,11 @@
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Matthieu Lassalvy <malas34.github@gmail.com>
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- *
- */
-// German strings (de)
-/*jslint vars: true, plusplus: true, devel: true, nomen: true, indent: 4, maxerr: 50 */
-/*global define */
 define({
-    'BEAUTIFY_ON_SAVE': 'Beautify beim Speichern',
-    'FILE_ERROR': 'Dateityp konnte nicht ermittelt werden',
-    'SASS_FORMAT': 'Beim Formatieren der SASS-Datei ist ein Fehler aufgetreten',
-    'SASS_ERROR': 'Der Pfad zum sass-convert Programm muss angegeben werden'
+    BEAUTIFY_ON_SAVE: 'Beautify beim Speichern',
+    BEAUTIFY_ON_SAVE_DESC: 'Aktiviert Beautify beim Speichern',
+    UNSUPPORTED_TITLE: 'Sprache nicht unterstützt',
+    UNSUPPORTED_MESSAGE: 'Diese Sprache ist nicht unterstützt.\n Verfügbare Sprachen sind JavaScript, JSON, HTML, XML, SVG, HTML in PHP, Embedded JavaScript, Handlebars, CSS, SCSS, und LESS.',
+
+    SASS_PREF_NAME: 'Pfad zum sass-convert Programm',
+    SASS_PREF_DESC: 'Absoluter Pfad zum sass-convert Programm',
+    SASS_FORMAT: 'Fehler beim formatieren der SASS Datei',
+    SASS_ERROR: 'Bitte gib einen Pfad zum SASS-Convert Programm an.'
 });
