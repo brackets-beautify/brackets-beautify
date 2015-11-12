@@ -28,7 +28,6 @@ The default is defined in `default.jsbeautifyrc` and looks like this:
 {
     "js": {
         "eol": "\n",
-        "indent_level": 0,
         "preserve_newlines": true,
         "max_preserve_newlines": 10,
         "space_after_anon_function": true,

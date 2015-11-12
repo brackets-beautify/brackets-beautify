@@ -117,10 +117,23 @@ define(function (require) {
         }
         var range;
         if (editor.hasSelection()) {
-            currentOptions.indentation_level = editor.getSelection().start.ch;
             currentOptions.end_with_newline = false;
             unformattedText = editor.getSelectedText();
             range = editor.getSelection();
+
+            /*
+             * When we are only formatting a range, we still want to have it correctly indented with the flow.
+             * The library has an option for that (indent_level), however that doesn't seem to work.
+             * See open issue: https://github.com/beautify-web/js-beautify/issues/724).
+             * As a temporary solution we are checking if the starting line of the selection has some unselected
+             * indentation and if so extending the selection.
+             */
+            // currentOptions.indent_level = range.start.ch;
+            var indentChars = document.getLine(range.start.line).substr(0, range.start.ch);
+            if (indentChars.trim().length === 0) {
+                range.start.ch = 0;
+                unformattedText = indentChars + unformattedText;
+            }
         } else {
             unformattedText = document.getText();
             /*
