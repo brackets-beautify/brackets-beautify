@@ -29,7 +29,6 @@ define(function (require) {
     var Editor             = brackets.getModule('editor/Editor').Editor;
     var EditorManager      = brackets.getModule('editor/EditorManager');
     var FileSystem         = brackets.getModule('filesystem/FileSystem');
-    var FileSystemError    = brackets.getModule('filesystem/FileSystemError');
     var LanguageManager    = brackets.getModule('language/LanguageManager');
     var LiveDevelopment    = brackets.getModule('LiveDevelopment/LiveDevelopment');
     var PreferencesManager = brackets.getModule('preferences/PreferencesManager');
@@ -177,26 +176,26 @@ define(function (require) {
         }
     }
 
-    function loadConfig(optionsFile) {
+    function loadOptions(optionsFile) {
         if (!optionsFile) {
             optionsFile = FileSystem.getFileForPath(ProjectManager.getProjectRoot().fullPath + OPTIONS_FILE_NAME);
         }
         optionsFile.read(function (err, content) {
-            if (err === FileSystemError.NOT_FOUND) {
-                return;
+            if (!err && content) {
+                try {
+                    options = $.extend(true, {}, defaultOptions, JSON.parse(content));
+                    return;
+                } catch (e) {
+                    console.error('Brackets Beautify - Error parsing options (' + optionsFile.fullPath + '). Using default.');
+                }
             }
-            try {
-                options = $.extend(true, {}, defaultOptions, JSON.parse(content));
-            } catch (e) {
-                console.error('Brackets Beautify - Error parsing options (' + optionsFile.fullPath + '). Using default.');
-                options = defaultOptions;
-            }
+            options = defaultOptions;
         });
     }
 
-    function loadConfigOnChange(e, document) {
+    function loadOptionsOnChange(e, document) {
         if (document.file.fullPath === ProjectManager.getProjectRoot().fullPath + OPTIONS_FILE_NAME) {
-            loadConfig(document.file);
+            loadOptions(document.file);
         }
     }
 
@@ -229,11 +228,11 @@ define(function (require) {
 
     AppInit.appReady(function () {
         DocumentManager.on('documentSaved.beautify', onSave);
-        DocumentManager.on('documentSaved.beautifyOptions', loadConfigOnChange);
-        DocumentManager.on('documentRefreshed.beautifyOptions', loadConfigOnChange);
+        DocumentManager.on('documentSaved.beautifyOptions', loadOptionsOnChange);
+        DocumentManager.on('documentRefreshed.beautifyOptions', loadOptionsOnChange);
         ProjectManager.on('projectOpen.beautifyOptions', function () {
-            loadConfig();
+            loadOptions();
         });
-        loadConfig();
+        loadOptions();
     });
 });
