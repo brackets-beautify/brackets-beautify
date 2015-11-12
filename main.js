@@ -5,6 +5,7 @@ define(function (require) {
     var COMMAND_ID = PREFIX + '.beautify';
     var COMMAND_SAVE_ID = PREFIX + '.autosave';
     var PREF_SAVE_ID = 'onSave';
+    var PREF_DIALOG_ID = 'hideDialog';
     var OPTIONS_FILE_NAME = '.jsbeautifyrc';
     var KEY_BINDINGS = [
         {
@@ -39,6 +40,10 @@ define(function (require) {
     /* beautify preserve:end */
 
     var Strings = require('strings');
+    var DialogContentTemplate = require('text!templates/dialog-content.html');
+    var DialogContent = Mustache.render(DialogContentTemplate, {
+        Strings: Strings
+    });
     var beautifiers = {
         js: require('thirdparty/beautify').js_beautify,
         css: require('thirdparty/beautify-css').css_beautify,
@@ -92,8 +97,11 @@ define(function (require) {
                 externalBeautifier = true;
                 break;
             default:
-                if (!autoSave) {
-                    Dialogs.showModalDialog(DefaultDialogs.DIALOG_ID_ERROR, Strings.UNSUPPORTED_TITLE, Strings.UNSUPPORTED_MESSAGE);
+                if (!autoSave && !prefs.get(PREF_DIALOG_ID)) {
+                    var Dialog = Dialogs.showModalDialog(DefaultDialogs.DIALOG_ID_ERROR, Strings.UNSUPPORTED_TITLE, DialogContent);
+                    Dialog.getPromise().done(function () {
+                        prefs.set(PREF_DIALOG_ID, Dialog.getElement().find('input').prop('checked'));
+                    });
                 }
                 return;
         }
@@ -212,6 +220,10 @@ define(function (require) {
         name: Strings.BEAUTIFY_ON_SAVE,
         description: Strings.BEAUTIFY_ON_SAVE_DESC
     }).on('change', changePref);
+    prefs.definePreference(PREF_DIALOG_ID, 'boolean', false, {
+        name: Strings.PREF_DIALOG_NAME,
+        description: Strings.PREF_DIALOG_DESC
+    });
 
     CommandManager.register(Strings.BEAUTIFY, COMMAND_ID, format);
     CommandManager.register(Strings.BEAUTIFY_ON_SAVE, COMMAND_SAVE_ID, executeCommand);
