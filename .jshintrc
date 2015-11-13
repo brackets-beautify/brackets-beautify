@@ -27,9 +27,10 @@
     "jquery": true,
 
     "globals": {
-        "require": false,
-        "define": false,
+        "Mustache": false,
         "brackets": false,
-        "console": false
+        "console": false,
+        "define": false,
+        "require": false
     }
 }

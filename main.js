@@ -5,6 +5,7 @@ define(function (require) {
     var COMMAND_ID = PREFIX + '.beautify';
     var COMMAND_SAVE_ID = PREFIX + '.autosave';
     var PREF_SAVE_ID = 'onSave';
+    var PREF_DIALOG_ID = 'hideDialog';
     var OPTIONS_FILE_NAME = '.jsbeautifyrc';
     var KEY_BINDINGS = [
         {
@@ -29,7 +30,6 @@ define(function (require) {
     var Editor             = brackets.getModule('editor/Editor').Editor;
     var EditorManager      = brackets.getModule('editor/EditorManager');
     var FileSystem         = brackets.getModule('filesystem/FileSystem');
-    var FileSystemError    = brackets.getModule('filesystem/FileSystemError');
     var LanguageManager    = brackets.getModule('language/LanguageManager');
     var LiveDevelopment    = brackets.getModule('LiveDevelopment/LiveDevelopment');
     var PreferencesManager = brackets.getModule('preferences/PreferencesManager');
@@ -40,6 +40,10 @@ define(function (require) {
     /* beautify preserve:end */
 
     var Strings = require('strings');
+    var DialogContentTemplate = require('text!templates/dialog-content.html');
+    var DialogContent = Mustache.render(DialogContentTemplate, {
+        Strings: Strings
+    });
     var beautifiers = {
         js: require('thirdparty/beautify').js_beautify,
         css: require('thirdparty/beautify-css').css_beautify,
@@ -93,8 +97,11 @@ define(function (require) {
                 externalBeautifier = true;
                 break;
             default:
-                if (!autoSave) {
-                    Dialogs.showModalDialog(DefaultDialogs.DIALOG_ID_ERROR, Strings.UNSUPPORTED_TITLE, Strings.UNSUPPORTED_MESSAGE);
+                if (!autoSave && !prefs.get(PREF_DIALOG_ID)) {
+                    var Dialog = Dialogs.showModalDialog(DefaultDialogs.DIALOG_ID_ERROR, Strings.UNSUPPORTED_TITLE, DialogContent);
+                    Dialog.getPromise().done(function () {
+                        prefs.set(PREF_DIALOG_ID, Dialog.getElement().find('input').prop('checked'));
+                    });
                 }
                 return;
         }
@@ -110,10 +117,23 @@ define(function (require) {
         }
         var range;
         if (editor.hasSelection()) {
-            currentOptions.indentation_level = editor.getSelection().start.ch;
             currentOptions.end_with_newline = false;
             unformattedText = editor.getSelectedText();
             range = editor.getSelection();
+
+            /*
+             * When we are only formatting a range, we still want to have it correctly indented with the flow.
+             * The library has an option for that (indent_level), however that doesn't seem to work.
+             * See open issue: https://github.com/beautify-web/js-beautify/issues/724).
+             * As a temporary solution we are checking if the starting line of the selection has some unselected
+             * indentation and if so extending the selection.
+             */
+            // currentOptions.indent_level = range.start.ch;
+            var indentChars = document.getLine(range.start.line).substr(0, range.start.ch);
+            if (indentChars.trim().length === 0) {
+                range.start.ch = 0;
+                unformattedText = indentChars + unformattedText;
+            }
         } else {
             unformattedText = document.getText();
             /*
@@ -177,26 +197,26 @@ define(function (require) {
         }
     }
 
-    function loadConfig(optionsFile) {
+    function loadOptions(optionsFile) {
         if (!optionsFile) {
             optionsFile = FileSystem.getFileForPath(ProjectManager.getProjectRoot().fullPath + OPTIONS_FILE_NAME);
         }
         optionsFile.read(function (err, content) {
-            if (err === FileSystemError.NOT_FOUND) {
-                return;
+            if (!err && content) {
+                try {
+                    options = $.extend(true, {}, defaultOptions, JSON.parse(content));
+                    return;
+                } catch (e) {
+                    console.error('Brackets Beautify - Error parsing options (' + optionsFile.fullPath + '). Using default.');
+                }
             }
-            try {
-                options = $.extend(true, {}, defaultOptions, JSON.parse(content));
-            } catch (e) {
-                console.error('Brackets Beautify - Error parsing options (' + optionsFile.fullPath + '). Using default.');
-                options = defaultOptions;
-            }
+            options = defaultOptions;
         });
     }
 
-    function loadConfigOnChange(e, document) {
+    function loadOptionsOnChange(e, document) {
         if (document.file.fullPath === ProjectManager.getProjectRoot().fullPath + OPTIONS_FILE_NAME) {
-            loadConfig(document.file);
+            loadOptions(document.file);
         }
     }
 
@@ -213,6 +233,10 @@ define(function (require) {
         name: Strings.BEAUTIFY_ON_SAVE,
         description: Strings.BEAUTIFY_ON_SAVE_DESC
     }).on('change', changePref);
+    prefs.definePreference(PREF_DIALOG_ID, 'boolean', false, {
+        name: Strings.PREF_DIALOG_NAME,
+        description: Strings.PREF_DIALOG_DESC
+    });
 
     CommandManager.register(Strings.BEAUTIFY, COMMAND_ID, format);
     CommandManager.register(Strings.BEAUTIFY_ON_SAVE, COMMAND_SAVE_ID, executeCommand);
@@ -229,11 +253,11 @@ define(function (require) {
 
     AppInit.appReady(function () {
         DocumentManager.on('documentSaved.beautify', onSave);
-        DocumentManager.on('documentSaved.beautifyOptions', loadConfigOnChange);
-        DocumentManager.on('documentRefreshed.beautifyOptions', loadConfigOnChange);
+        DocumentManager.on('documentSaved.beautifyOptions', loadOptionsOnChange);
+        DocumentManager.on('documentRefreshed.beautifyOptions', loadOptionsOnChange);
         ProjectManager.on('projectOpen.beautifyOptions', function () {
-            loadConfig();
+            loadOptions();
         });
-        loadConfig();
+        loadOptions();
     });
 });
