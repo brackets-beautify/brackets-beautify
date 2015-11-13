@@ -62,8 +62,10 @@ define(function (require) {
         var document = DocumentManager.getCurrentDocument();
         document.batchOperation(function () {
             if (range) {
+                unfoldRange(editor._codeMirror, range);
                 document.replaceRange(formattedText, range.start, range.end);
             } else {
+                unfoldAll(editor._codeMirror);
                 document.setText(formattedText);
             }
             editor.setCursorPos(cursorPos);
@@ -227,6 +229,32 @@ define(function (require) {
     function executeCommand() {
         CommandManager.get(COMMAND_SAVE_ID).setChecked(!CommandManager.get(COMMAND_SAVE_ID).getChecked());
         prefs.set(PREF_SAVE_ID, CommandManager.get(COMMAND_SAVE_ID).getChecked());
+    }
+
+    function unfoldRange(cm, range) {
+        var from = range.start.line;
+        var to = range.end.line;
+        cm.operation(function () {
+            var i, e;
+            for (i = from, e = to; i <= e; i++) {
+                if (cm.isFolded(i)) {
+                    cm.unfoldCode(i, {range: cm._lineFolds[i]});
+                }
+            }
+        });
+    }
+
+    function unfoldAll(cm) {
+        var from = cm.firstLine();
+        var to = cm.lastLine();
+        cm.operation(function () {
+            var i, e;
+            for (i = from, e = to; i <= e; i++) {
+                if (cm.isFolded(i)) {
+                    cm.unfoldCode(i, {range: cm._lineFolds[i]});
+                }
+            }
+        });
     }
 
     prefs.definePreference(PREF_SAVE_ID, 'boolean', false, {
