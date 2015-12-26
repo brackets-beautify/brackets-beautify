@@ -41,6 +41,9 @@
         },
         "it": {
             "description": "Formato JavaScript, HTML e file CSS e linguaggi affini."
-        }
+        },
+        "zh-cn": {
+            "description": "格式化JavaScript, HTML, CSS文件以及相关的语言。",
+        },
     }
 }
