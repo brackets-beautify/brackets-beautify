@@ -33,7 +33,8 @@
         "en",
         "es",
         "it",
-        "ja"
+        "ja",
+        "zh-cn"
     ],
     "package-i18n": {
         "de": {
