@@ -6,6 +6,7 @@ define(function (require, exports, module) {
         de: true,
         es: true,
         it: true,
-        ja: true
+        ja: true,
+        'zh-cn': true
     };
 });
