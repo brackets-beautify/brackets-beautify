@@ -171,11 +171,15 @@ define(function (require) {
             var formattedText = beautifiers[beautifier](unformattedText, currentOptions);
             if (formattedText !== unformattedText) {
                 batchUpdate(formattedText, range);
+            } else {
+                editor._codeMirror.undoSelection();
             }
         } else {
             beautifiers[beautifier](unformattedText, currentOptions, function (formattedText) {
                 if (formattedText !== unformattedText) {
                     batchUpdate(formattedText, range);
+                } else {
+                    editor._codeMirror.undoSelection();
                 }
             });
         }
