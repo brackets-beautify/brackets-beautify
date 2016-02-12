@@ -172,14 +172,18 @@ define(function (require) {
             if (formattedText !== unformattedText) {
                 batchUpdate(formattedText, range);
             } else {
-                editor._codeMirror.undoSelection();
+                if (!autoSave) {
+                    editor._codeMirror.undoSelection();
+                }
             }
         } else {
             beautifiers[beautifier](unformattedText, currentOptions, function (formattedText) {
                 if (formattedText !== unformattedText) {
                     batchUpdate(formattedText, range);
                 } else {
-                    editor._codeMirror.undoSelection();
+                    if (!autoSave) {
+                        editor._codeMirror.undoSelection();
+                    }
                 }
             });
         }
