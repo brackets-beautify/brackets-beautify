@@ -94,7 +94,7 @@ For example:
 {
     "documentation": "https://github.com/adobe/brackets/wiki/User-Key-Bindings",
     "overrides": {
-        "Ctrl-Alt-F": "bb.beautify.beautify"
+        "Ctrl-Alt-F": "me.drewh.jsbeautify"
     }
 }
 ```
