@@ -55,6 +55,36 @@ define(function (require) {
 
     var prefs = PreferencesManager.getExtensionPrefs(PREFIX);
 
+    function unfoldRange(cm, range) {
+        var from = range.start.line;
+        var to = range.end.line;
+        cm.operation(function () {
+            var i, e;
+            for (i = from, e = to; i <= e; i++) {
+                if (cm.isFolded(i)) {
+                    cm.unfoldCode(i, {
+                        range: cm._lineFolds[i]
+                    });
+                }
+            }
+        });
+    }
+
+    function unfoldAll(cm) {
+        var from = cm.firstLine();
+        var to = cm.lastLine();
+        cm.operation(function () {
+            var i, e;
+            for (i = from, e = to; i <= e; i++) {
+                if (cm.isFolded(i)) {
+                    cm.unfoldCode(i, {
+                        range: cm._lineFolds[i]
+                    });
+                }
+            }
+        });
+    }
+
     function batchUpdate(formattedText, range) {
         var editor = EditorManager.getCurrentFullEditor();
         var cursorPos = editor.getCursorPos();
@@ -62,8 +92,10 @@ define(function (require) {
         var document = DocumentManager.getCurrentDocument();
         document.batchOperation(function () {
             if (range) {
+                unfoldRange(editor._codeMirror, range);
                 document.replaceRange(formattedText, range.start, range.end);
             } else {
+                unfoldAll(editor._codeMirror);
                 document.setText(formattedText);
             }
             editor.setCursorPos(cursorPos);
@@ -116,9 +148,11 @@ define(function (require) {
             currentOptions.indent_char = ' ';
         }
         var range;
-        if (editor.hasSelection()) {
+        var selectedText = editor.getSelectedText();
+        var fullText = document.getText();
+        if (editor.hasSelection() && selectedText !== fullText) {
             currentOptions.end_with_newline = false;
-            unformattedText = editor.getSelectedText();
+            unformattedText = selectedText;
             range = editor.getSelection();
 
             /*
@@ -135,7 +169,7 @@ define(function (require) {
                 unformattedText = indentChars + unformattedText;
             }
         } else {
-            unformattedText = document.getText();
+            unformattedText = fullText;
             /*
              * If the current document is html and is currently used in LiveDevelopment, we must not change the html tag
              * as that causes the DOM in the browser to duplicate (see https://github.com/adobe/brackets/issues/10634).
@@ -167,11 +201,19 @@ define(function (require) {
             var formattedText = beautifiers[beautifier](unformattedText, currentOptions);
             if (formattedText !== unformattedText) {
                 batchUpdate(formattedText, range);
+            } else {
+                if (!autoSave) {
+                    editor._codeMirror.undoSelection();
+                }
             }
         } else {
             beautifiers[beautifier](unformattedText, currentOptions, function (formattedText) {
                 if (formattedText !== unformattedText) {
                     batchUpdate(formattedText, range);
+                } else {
+                    if (!autoSave) {
+                        editor._codeMirror.undoSelection();
+                    }
                 }
             });
         }
