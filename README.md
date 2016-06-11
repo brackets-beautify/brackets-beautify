@@ -1,5 +1,5 @@
-# Brackets Beautify 2.0
-[Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.5.10][js-beautify version].
+# Brackets Beautify 2.x
+[Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.6.3][js-beautify version].
 
 ## Version Information
 We are currently having [trouble](https://github.com/adobe/brackets/issues/12464) uploading the latest version to the Brackets Extension Registry.  
@@ -133,7 +133,7 @@ Brackets Beautify is licensed under the [MIT license][MIT]. [js-beautify][js-bea
 [Beautify User Key Map]: https://github.com/brackets-beautify/brackets-beautify#user-key-map-for-beautify
 [Beautify Beautify on Save]: https://github.com/brackets-beautify/brackets-beautify#file-options-for-beautify-on-save
 [js-beautify]: https://github.com/beautify-web/js-beautify
-[js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v1510
+[js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v163
 [js-beautify issues]: https://github.com/beautify-web/js-beautify/issues
 [js-beautify options]: https://github.com/beautify-web/js-beautify#options
 [SASS Install]: http://sass-lang.com/install

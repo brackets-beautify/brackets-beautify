@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
+
+## Unreleased
+### Added
+- Chinese (simplified) translation
+
+### Changed
+- Updated js-beautify to version 1.6.3
+
+
 ## 2.0.0 - 2015-11-24
 ### Added
 - Use Brackets Preferences language and path layer to configure `Beautify on save`
