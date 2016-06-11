@@ -1,4 +1,4 @@
-define(function (require) {
+define(function (require, exports, module) {
     'use strict';
 
     var PREFIX = 'bb.beautify';
@@ -35,6 +35,7 @@ define(function (require) {
     var PreferencesManager = brackets.getModule('preferences/PreferencesManager');
     var ProjectManager     = brackets.getModule('project/ProjectManager');
     var AppInit            = brackets.getModule('utils/AppInit');
+    var ExtensionUtils     = brackets.getModule('utils/ExtensionUtils');
     var DefaultDialogs     = brackets.getModule('widgets/DefaultDialogs');
     var Dialogs            = brackets.getModule('widgets/Dialogs');
     /* beautify preserve:end */
@@ -53,6 +54,7 @@ define(function (require) {
     var defaultOptions = JSON.parse(require('text!default.jsbeautifyrc'));
     var options;
 
+    ExtensionUtils.loadStyleSheet(module, 'styles/styles.css');
     var prefs = PreferencesManager.getExtensionPrefs(PREFIX);
 
     function batchUpdate(formattedText, range) {
@@ -251,6 +253,14 @@ define(function (require) {
     var jsonLanguage = LanguageManager.getLanguage('json');
     jsonLanguage.addFileExtension(OPTIONS_FILE_NAME);
     jsonLanguage.addFileName(OPTIONS_FILE_NAME);
+
+    // Add Toolbar Button
+    $(document.createElement('a'))
+        .attr('id', 'beautify-icon')
+        .attr('href', '#')
+        .attr('title', Strings.BEAUTIFY)
+        .on('click', format)
+        .appendTo($('#main-toolbar .buttons'))
 
     AppInit.appReady(function () {
         DocumentManager.on('documentSaved.beautify', onSave);
