@@ -8,10 +8,11 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 - Chinese (simplified) translation, thanks to [__@quarkchaos__](https://github.com/quarkchaos)
 - Romanian translation, thanks to [__@Mitroo__](https://github.com/Mitroo)
 - Basic support for Vue component files
+- Toolbar Button to Beautify
 
 ### Changed
 - Updated js-beautify to version 1.6.3
-
+- Require Brackets 1.7.0
 
 ## 2.0.0 - 2015-11-24
 ### Added

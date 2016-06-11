@@ -34,6 +34,7 @@ define(function (require, exports, module) {
     var LiveDevelopment    = brackets.getModule('LiveDevelopment/LiveDevelopment');
     var PreferencesManager = brackets.getModule('preferences/PreferencesManager');
     var ProjectManager     = brackets.getModule('project/ProjectManager');
+    var Mustache           = brackets.getModule('thirdparty/mustache/mustache');
     var AppInit            = brackets.getModule('utils/AppInit');
     var ExtensionUtils     = brackets.getModule('utils/ExtensionUtils');
     var DefaultDialogs     = brackets.getModule('widgets/DefaultDialogs');
