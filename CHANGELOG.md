@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
-## Unreleased
+## 2.1.0 - 2016-06-11
 ### Added
 - Chinese (simplified) translation, thanks to [__@quarkchaos__](https://github.com/quarkchaos)
 - Romanian translation, thanks to [__@Mitroo__](https://github.com/Mitroo)
@@ -13,6 +13,7 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 ### Changed
 - Updated js-beautify to version 1.6.3
 - Require Brackets 1.7.0
+
 
 ## 2.0.0 - 2015-11-24
 ### Added
