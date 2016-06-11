@@ -5,7 +5,9 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 ### Added
-- Chinese (simplified) translation
+- Chinese (simplified) translation, thanks to [__@quarkchaos__](https://github.com/quarkchaos)
+- Romanian translation, thanks to [__@Mitroo__](https://github.com/Mitroo)
+- Basic support for Vue component files
 
 ### Changed
 - Updated js-beautify to version 1.6.3

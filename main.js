@@ -86,6 +86,7 @@ define(function (require) {
             case 'php':
             case 'ejs':
             case 'handlebars':
+            case 'vue':
                 beautifier = 'html';
                 break;
             case 'css':
