@@ -22,7 +22,7 @@ define(function (require, exports, module) {
         }
     ];
 
-    /* beautify preserve:start */
+    /* beautify preserve:start *//* eslint-disable no-multi-spaces */
     var CommandManager     = brackets.getModule('command/CommandManager');
     var Commands           = brackets.getModule('command/Commands');
     var Menus              = brackets.getModule('command/Menus');
@@ -39,7 +39,7 @@ define(function (require, exports, module) {
     var ExtensionUtils     = brackets.getModule('utils/ExtensionUtils');
     var DefaultDialogs     = brackets.getModule('widgets/DefaultDialogs');
     var Dialogs            = brackets.getModule('widgets/Dialogs');
-    /* beautify preserve:end */
+    /* eslint-enable no-multi-spaces *//* beautify preserve:end */
 
     var Strings = require('strings');
     var DialogContentTemplate = require('text!templates/dialog-content.html');
@@ -167,17 +167,17 @@ define(function (require, exports, module) {
                 }
             }
         }
-        if (!externalBeautifier) {
-            var formattedText = beautifiers[beautifier](unformattedText, currentOptions);
-            if (formattedText !== unformattedText) {
-                batchUpdate(formattedText, range);
-            }
-        } else {
+        if (externalBeautifier) {
             beautifiers[beautifier](unformattedText, currentOptions, function (formattedText) {
                 if (formattedText !== unformattedText) {
                     batchUpdate(formattedText, range);
                 }
             });
+        } else {
+            var formattedText = beautifiers[beautifier](unformattedText, currentOptions);
+            if (formattedText !== unformattedText) {
+                batchUpdate(formattedText, range);
+            }
         }
     }
 
@@ -210,7 +210,7 @@ define(function (require, exports, module) {
                 try {
                     options = $.extend(true, {}, defaultOptions, JSON.parse(content));
                     return;
-                } catch (e) {
+                } catch (error) {
                     console.error('Brackets Beautify - Error parsing options (' + optionsFile.fullPath + '). Using default.');
                 }
             }
@@ -218,7 +218,7 @@ define(function (require, exports, module) {
         });
     }
 
-    function loadOptionsOnChange(e, document) {
+    function loadOptionsOnChange(error, document) {
         if (document.file.fullPath === ProjectManager.getProjectRoot().fullPath + OPTIONS_FILE_NAME) {
             loadOptions(document.file);
         }
@@ -261,7 +261,7 @@ define(function (require, exports, module) {
         .attr('href', '#')
         .attr('title', Strings.BEAUTIFY)
         .on('click', format)
-        .appendTo($('#main-toolbar .buttons'))
+        .appendTo($('#main-toolbar .buttons'));
 
     AppInit.appReady(function () {
         DocumentManager.on('documentSaved.beautify', onSave);

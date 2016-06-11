@@ -4,12 +4,12 @@ define(function (require, exports, module) {
     var PREFIX = 'bb.beautify';
     var PATH_PREF = 'external.sass';
 
-    /* beautify preserve:start */
+    /* beautify preserve:start *//* eslint-disable no-multi-spaces */
     var DocumentManager    = brackets.getModule('document/DocumentManager');
     var PreferencesManager = brackets.getModule('preferences/PreferencesManager');
     var ExtensionUtils     = brackets.getModule('utils/ExtensionUtils');
     var NodeDomain         = brackets.getModule('utils/NodeDomain');
-    /* beautify preserve:end */
+    /* eslint-enable no-multi-spaces *//* beautify preserve:end */
 
     var Strings = require('strings');
 

@@ -1,4 +1,5 @@
-/* jshint node: true */
+/* eslint-env node */
+/* eslint-disable strict */
 
 (function () {
     'use strict';
