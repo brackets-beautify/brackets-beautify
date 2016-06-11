@@ -46,7 +46,8 @@ The default is defined in `default.jsbeautifyrc` and looks like this:
         "unescape_strings": false,
         "wrap_line_length": 0,
         "wrap_attributes": "auto",
-        "end_with_newline": true
+        "end_with_newline": true,
+        "comma_first": false
     },
     "css": {
         "eol": "\n",
