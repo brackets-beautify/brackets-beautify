@@ -34,6 +34,7 @@
         "es",
         "it",
         "ja",
+        "ro",
         "zh-cn"
     ],
     "package-i18n": {
@@ -42,6 +43,9 @@
         },
         "it": {
             "description": "Formato JavaScript, HTML e file CSS e linguaggi affini."
+        },
+        "ro": {
+            "description": "Formatează fișiere JavaScript, HTML și CSS și alte limbaje apropiate."
         },
         "zh-cn": {
             "description": "格式化JavaScript, HTML, CSS文件以及相关的语言。"

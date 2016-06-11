@@ -7,6 +7,7 @@ define(function (require, exports, module) {
         es: true,
         it: true,
         ja: true,
+	ro: true,
         'zh-cn': true
     };
 });
