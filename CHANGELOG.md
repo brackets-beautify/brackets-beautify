@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
+## 2.2.0 - 2016-06-12
+### Added
+- Configure any program to beautify a language
+
+### Removed
+- Explicit SASS settings as they can be handled by generic mechanism
+
+
 ## 2.1.0 - 2016-06-11
 ### Added
 - Chinese (simplified) translation, thanks to [__@quarkchaos__](https://github.com/quarkchaos)

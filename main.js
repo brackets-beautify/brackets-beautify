@@ -6,6 +6,8 @@ define(function (require, exports, module) {
     var COMMAND_SAVE_ID = PREFIX + '.autosave';
     var PREF_SAVE_ID = 'onSave';
     var PREF_DIALOG_ID = 'hideDialog';
+    var PREF_BEAUTIFIERS_ID = 'beautifiers';
+    var PREF_LANGUAGES_ID = 'languages';
     var OPTIONS_FILE_NAME = '.jsbeautifyrc';
     var KEY_BINDINGS = [
         {
@@ -46,12 +48,12 @@ define(function (require, exports, module) {
     var DialogContent = Mustache.render(DialogContentTemplate, {
         Strings: Strings
     });
-    var beautifiers = {
+    var beautifyWeb = {
         js: require('thirdparty/beautify').js_beautify,
         css: require('thirdparty/beautify-css').css_beautify,
-        html: require('thirdparty/beautify-html').html_beautify,
-        sass: require('external/sass/beautify').beautify
+        html: require('thirdparty/beautify-html').html_beautify
     };
+    var externalBeautifier = require('external/beautify');
     var defaultOptions = JSON.parse(require('text!default.jsbeautifyrc'));
     var options;
 
@@ -75,39 +77,15 @@ define(function (require, exports, module) {
     }
 
     function format(autoSave) {
-        var beautifier;
-        var externalBeautifier;
         var document = DocumentManager.getCurrentDocument();
-        switch (document.getLanguage().getId()) {
-            case 'javascript':
-            case 'json':
-                beautifier = 'js';
-                break;
-            case 'html':
-            case 'xml':
-            case 'svg':
-            case 'php':
-            case 'ejs':
-            case 'handlebars':
-            case 'vue':
-                beautifier = 'html';
-                break;
-            case 'css':
-            case 'less':
-                beautifier = 'css';
-                break;
-            case 'scss':
-                beautifier = 'sass';
-                externalBeautifier = true;
-                break;
-            default:
-                if (!autoSave && !prefs.get(PREF_DIALOG_ID)) {
-                    var Dialog = Dialogs.showModalDialog(DefaultDialogs.DIALOG_ID_ERROR, Strings.UNSUPPORTED_TITLE, DialogContent);
-                    Dialog.getPromise().done(function () {
-                        prefs.set(PREF_DIALOG_ID, Dialog.getElement().find('input').prop('checked'));
-                    });
-                }
-                return;
+        var beautifier = prefs.get(PREF_LANGUAGES_ID)[document.getLanguage().getId()];
+
+        if (!beautifier && !autoSave) {
+            var Dialog = Dialogs.showModalDialog(DefaultDialogs.DIALOG_ID_ERROR, Strings.UNSUPPORTED_TITLE, DialogContent);
+            Dialog.getPromise().done(function () {
+                prefs.set(PREF_DIALOG_ID, Dialog.getElement().find('input').prop('checked'));
+            });
+            return;
         }
 
         var unformattedText;
@@ -167,17 +145,22 @@ define(function (require, exports, module) {
                 }
             }
         }
-        if (externalBeautifier) {
-            beautifiers[beautifier](unformattedText, currentOptions, function (formattedText) {
-                if (formattedText !== unformattedText) {
-                    batchUpdate(formattedText, range);
-                }
-            });
-        } else {
-            var formattedText = beautifiers[beautifier](unformattedText, currentOptions);
+
+        if (beautifyWeb[beautifier]) {
+            var formattedText = beautifyWeb[beautifier](unformattedText, currentOptions);
             if (formattedText !== unformattedText) {
                 batchUpdate(formattedText, range);
             }
+        } else {
+            var externalBeautifierOptions = prefs.get(PREF_BEAUTIFIERS_ID)[beautifier];
+            // eslint-disable-next-line no-shadow
+            externalBeautifier.beautify(externalBeautifierOptions, unformattedText, function (err, formattedText) {
+                if (err) {
+                    console.error(err);
+                } else if (formattedText !== unformattedText) {
+                    batchUpdate(formattedText, range);
+                }
+            });
         }
     }
 
@@ -241,6 +224,33 @@ define(function (require, exports, module) {
         name: Strings.PREF_DIALOG_NAME,
         description: Strings.PREF_DIALOG_DESC
     });
+    prefs.definePreference(PREF_BEAUTIFIERS_ID, 'object', {}, {
+        name: Strings.PREF_BEAUTIFIERS_NAME,
+        description: Strings.PREF_BEAUTIFIERS_DESC,
+        validator: function (value) {
+            // Disallow overriding built-in beautifiers
+            return !value.js && !value.html && !value.css;
+        }
+    });
+    prefs.definePreference(PREF_LANGUAGES_ID, 'object', {
+        javascript: 'js',
+        json: 'js',
+
+        html: 'html',
+        xml: 'html',
+        svg: 'html',
+        php: 'html',
+        ejs: 'html',
+        handlebars: 'html',
+        vue: 'html',
+
+        css: 'css',
+        less: 'css',
+        scss: 'css'
+    }, {
+        name: Strings.PREF_LANGUAGES_NAME,
+        description: Strings.PREF_LANGUAGES_DESC
+    });
 
     CommandManager.register(Strings.BEAUTIFY, COMMAND_ID, format);
     CommandManager.register(Strings.BEAUTIFY_ON_SAVE, COMMAND_SAVE_ID, executeCommand);
@@ -260,7 +270,9 @@ define(function (require, exports, module) {
         .attr('id', 'beautify-icon')
         .attr('href', '#')
         .attr('title', Strings.BEAUTIFY)
-        .on('click', format)
+        .on('click', function () {
+            format();
+        })
         .appendTo($('#main-toolbar .buttons'));
 
     AppInit.appReady(function () {

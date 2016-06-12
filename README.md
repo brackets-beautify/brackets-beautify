@@ -9,7 +9,7 @@ The last version on the Brackets Extension Registry is [1.2.0](https://github.co
 ## Installation
 ### Latest Release
 To install the latest _release_ of this extension use the `Install from URL...` function of the Brackets [Extension Manager][Brackets Extension Manager].
-The link can be found on our [Release-page](https://github.com/brackets-beautify/brackets-beautify/releases/latest).
+The link can be found on our [Release-page][Beautify latest release].
 
 ### Latest Commit
 To install the latest _commit_ of this extension use the built-in Brackets [Extension Manager][Brackets Extension Manager] which has a function to `Install from URL...` using this link:
@@ -19,14 +19,14 @@ https://github.com/brackets-beautify/brackets-beautify/archive/master.zip
 
 ## Usage
 Brackets Beautify can be run manually on the whole file or on a selection.
-Use the menu entry `Edit > Beautify`, the context-menu entry `Beautify`, or one of the keyboard shortcuts `Ctrl-Alt-B` (Windows/Linux), `Ctrl-Shift-L` (Windows), `Cmd-Shift-L` (Mac), or [define your own][Beautify User Key Map].
+Use the Toolbar Button with the wand icon, the menu entry `Edit > Beautify`, the context-menu entry `Beautify`, or one of the keyboard shortcuts `Ctrl-Alt-B` (Windows/Linux), `Ctrl-Shift-L` (Windows), `Cmd-Shift-L` (Mac), or [define your own][Beautify User Key Map].
 
 
 Alternatively it can be enabled to run automatically on save.
 Use the menu entry `Edit > Beautify on Save` or the more [advanced settings][Beautify Beautify on Save] to activate.
 
-### Configuration
-#### Beautifier Options
+## Configuration
+### Beautifier Options
 Brackets Beautify supports the same [options][js-beautify options] as [js-beautify][js-beautify] with the exception of indentation-based options (`indent_size`, `indent_char`, and `indent_with_tabs`) which are taken from the current settings in Brackets.
 The options can be specified in a `.jsbeautifyrc` file on project level and will be merged with the default.
 The default is defined in `default.jsbeautifyrc` and looks like this:
@@ -69,7 +69,7 @@ The default is defined in `default.jsbeautifyrc` and looks like this:
 }
 ```
 
-#### File Options for Beautify on Save
+### File Options for Beautify on Save
 Brackets Beautify leverages [Brackets preferences][Brackets preferences], which means that you can specify per project settings by defining a `.brackets.json` in the root directory of your project. With Brackets preferences you can even define per file settings, which is really handy when dealing with third party libraries or minified resources.
 
 Brackets Beautify also support per language settings, which enables you to enable/disabled `Beautify on Save` for your documents using the Brackets language layer.
@@ -94,7 +94,7 @@ The sample `.brackets.json` below generally enables `Beautify on Save` and disab
 }
 ```
 
-#### User Key Map for Beautify
+### User Key Map for Beautify
 Open the `keymap.json` with the menu entry `Debug > Open User Key Map` and add an _overrides_ entry.  
 For example:
 ```js
@@ -106,18 +106,44 @@ For example:
 }
 ```
 
-## External formatters
-### SASS
-You need to supply an absolute path to the `sass-convert` executable for SASS formatting to work.
+### Configure languages
+Brackets Beautify comes with beautifiers for JavaScript, HTML and CSS. You can add languages by adding their ids to the `bb.beautify.languages` setting:
+```json
+{
+    "bb.beautify.languages": {
+        "css": "css",
+        "ejs": "html",
+        "handlebars": "html",
+        "html": "html",
+        "javascript": "js",
+        "json": "js",
+        "less": "css",
+        "php": "html",
+        "scss": "css",
+        "svg": "html",
+        "vue": "html",
+        "xml": "html"
+    }
+}
+```
 
-- Install [SASS][SASS Install]
-- Get the absolute path to the executable  
-  Some example paths:
-  - On MacOSX  
-    Using *rbenv*: `/Users/<USER>/.rbenv/shims/sass-convert`  
-    Using system Ruby (`sudo gem install sass`): `/usr/bin/sass-convert`
-  - On Windows: `C:\\Ruby193\\bin\\sass-convert.bat`
-- Open the Brackets settings file and set the entry `bb.beautify.external.sass` to the path value.
+### External formatters
+Additionally, external formatters can be added to Brackets Beautify by modifying the `bb.beautify.beautifiers` setting.
+```json
+{
+    "bb.beautify.beautifiers": {
+        "formatterName": {
+            "command": "/path/to/file --with args"
+        }
+    },
+    "bb.beautify.languages": {
+        ⋮
+        "languageId": "formatterName"
+    }
+}
+```
+The key is a name that can be use to configure the language where this formatter should be used.  
+The `command` is executed on a shell and gets the filename as last command line argument.
 
 
 ## Issues
@@ -133,6 +159,7 @@ Brackets Beautify is licensed under the [MIT license][MIT]. [js-beautify][js-bea
 [Brackets preferences]: https://github.com/adobe/brackets/wiki/How-to-Use-Brackets#preferences
 [Beautify User Key Map]: https://github.com/brackets-beautify/brackets-beautify#user-key-map-for-beautify
 [Beautify Beautify on Save]: https://github.com/brackets-beautify/brackets-beautify#file-options-for-beautify-on-save
+[Beautify latest release]: https://github.com/brackets-beautify/brackets-beautify/releases/latest
 [js-beautify]: https://github.com/beautify-web/js-beautify
 [js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v163
 [js-beautify issues]: https://github.com/beautify-web/js-beautify/issues

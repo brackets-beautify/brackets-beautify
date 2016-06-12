@@ -117,7 +117,7 @@
     no-undef: 2 # disallow the use of undeclared variables unless mentioned in /*global */ comments
     no-undef-init: 2 # disallow initializing variables to undefined
     no-undefined: 1 # disallow the use of undefined as an identifier
-    no-unused-vars: 1 # disallow unused variables
+    no-unused-vars: [2, {vars: all, args: none}] # disallow unused variables
     no-use-before-define: 1 # disallow the use of variables before they are defined
   # Stylistic Issues
     array-bracket-spacing: 1 # enforce consistent spacing inside array brackets
