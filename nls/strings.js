@@ -8,6 +8,7 @@ define(function (require, exports, module) {
         it: true,
         ja: true,
         ro: true,
+        fa: true,
         'zh-cn': true
     };
 });
