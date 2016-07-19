@@ -35,6 +35,7 @@
         "it",
         "ja",
         "ro",
+        "fa",
         "zh-cn"
     ],
     "package-i18n": {
@@ -46,6 +47,9 @@
         },
         "ro": {
             "description": "Formatează fișiere JavaScript, HTML și CSS și alte limbaje apropiate."
+        },
+        "fa": {
+            "description": "قالب‌بندی فایل‌های جاوااسکریپت، HTML و CSS و زبان‌های مرتبط."
         },
         "zh-cn": {
             "description": "格式化JavaScript, HTML, CSS文件以及相关的语言。"
