@@ -50,6 +50,7 @@ define(function (require, exports, module) {
     });
     var beautifyWeb = {
         js: require('thirdparty/beautify').js_beautify,
+        jsx: require('thirdparty/beautify').js_beautify,
         css: require('thirdparty/beautify-css').css_beautify,
         html: require('thirdparty/beautify-html').html_beautify
     };
@@ -145,7 +146,10 @@ define(function (require, exports, module) {
                 }
             }
         }
-
+		console.log(beautifier)
+		if('jsx' == beautifier) {
+			currentOptions.e4x = true;
+		}
         if (beautifyWeb[beautifier]) {
             var formattedText = beautifyWeb[beautifier](unformattedText, currentOptions);
             if (formattedText !== unformattedText) {
@@ -229,12 +233,13 @@ define(function (require, exports, module) {
         description: Strings.PREF_BEAUTIFIERS_DESC,
         validator: function (value) {
             // Disallow overriding built-in beautifiers
-            return !value.js && !value.html && !value.css;
+            return !value.js && !value.jsx && !value.html && !value.css;
         }
     });
     prefs.definePreference(PREF_LANGUAGES_ID, 'object', {
         javascript: 'js',
         json: 'js',
+		jsx: 'jsx',
 
         html: 'html',
         xml: 'html',
