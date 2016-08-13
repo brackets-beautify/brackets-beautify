@@ -146,10 +146,9 @@ define(function (require, exports, module) {
                 }
             }
         }
-		console.log(beautifier)
-		if('jsx' == beautifier) {
-			currentOptions.e4x = true;
-		}
+        if('jsx' == beautifier) {
+            currentOptions.e4x = true;
+        }
         if (beautifyWeb[beautifier]) {
             var formattedText = beautifyWeb[beautifier](unformattedText, currentOptions);
             if (formattedText !== unformattedText) {
@@ -239,7 +238,7 @@ define(function (require, exports, module) {
     prefs.definePreference(PREF_LANGUAGES_ID, 'object', {
         javascript: 'js',
         json: 'js',
-		jsx: 'jsx',
+        jsx: 'jsx',
 
         html: 'html',
         xml: 'html',
