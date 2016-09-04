@@ -5,10 +5,10 @@ define(function (require, exports, module) {
         root: true,
         de: true,
         es: true,
+        fa: true,
         it: true,
         ja: true,
         ro: true,
-        fa: true,
         'zh-cn': true
     };
 });

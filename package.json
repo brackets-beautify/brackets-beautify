@@ -1,7 +1,7 @@
 {
     "name": "brackets-beautify",
     "title": "Beautify",
-    "version": "2.2.0",
+    "version": "2.3.0",
     "description": "Format JavaScript, HTML, and CSS files and related languages.",
     "engines": {
         "brackets": ">=1.7.0"
@@ -32,24 +32,24 @@
         "de",
         "en",
         "es",
+        "fa",
         "it",
         "ja",
         "ro",
-        "fa",
         "zh-cn"
     ],
     "package-i18n": {
         "de": {
             "description": "Formatiere JavaScript, HTML, und CSS Dateien und verwandte Sprachen."
         },
+        "fa": {
+            "description": "قالب‌بندی فایل‌های جاوااسکریپت، HTML و CSS و زبان‌های مرتبط."
+        },
         "it": {
             "description": "Formato JavaScript, HTML e file CSS e linguaggi affini."
         },
         "ro": {
             "description": "Formatează fișiere JavaScript, HTML și CSS și alte limbaje apropiate."
-        },
-        "fa": {
-            "description": "قالب‌بندی فایل‌های جاوااسکریپت، HTML و CSS و زبان‌های مرتبط."
         },
         "zh-cn": {
             "description": "格式化JavaScript, HTML, CSS文件以及相关的语言。"

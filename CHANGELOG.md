@@ -3,6 +3,15 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
+## 2.3.0 - 2016-09-04
+### Added
+- Farsi (Persian) Translation
+
+### Changed
+- Updated Italian Translation
+- Updated js-beautify to version 1.6.4
+
+
 ## 2.2.0 - 2016-06-12
 ### Added
 - Configure any program to beautify a language
