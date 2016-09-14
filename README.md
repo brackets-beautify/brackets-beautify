@@ -1,3 +1,4 @@
+[![Brackets Beautify on npm](https://img.shields.io/npm/v/brackets-beautify.svg?maxAge=2592000&style=flat-square)](https://www.npmjs.com/package/brackets-beautify)
 # Brackets Beautify 2.x
 [Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.6.4][js-beautify version].
 
@@ -16,6 +17,9 @@ To install the latest _commit_ of this extension use the built-in Brackets [Exte
 ```
 https://github.com/brackets-beautify/brackets-beautify/archive/master.zip
 ```
+
+### Brackets npm Registry
+The latest _release_ of this extension is also available on the [Brackets npm Registry][Brackets npm Registry].
 
 ## Usage
 Brackets Beautify can be run manually on the whole file or on a selection.
@@ -157,6 +161,7 @@ Brackets Beautify is licensed under the [MIT license][MIT]. [js-beautify][js-bea
 [Brackets Extension Manager]: https://github.com/adobe/brackets/wiki/Brackets-Extensions
 [Brackets Extension Registry]: https://brackets-registry.aboutweb.com
 [Brackets preferences]: https://github.com/adobe/brackets/wiki/How-to-Use-Brackets#preferences
+[Brackets npm Registry]: https://github.com/zaggino/brackets-npm-registry
 [Beautify User Key Map]: https://github.com/brackets-beautify/brackets-beautify#user-key-map-for-beautify
 [Beautify Beautify on Save]: https://github.com/brackets-beautify/brackets-beautify#file-options-for-beautify-on-save
 [Beautify latest release]: https://github.com/brackets-beautify/brackets-beautify/releases/latest
@@ -164,5 +169,4 @@ Brackets Beautify is licensed under the [MIT license][MIT]. [js-beautify][js-bea
 [js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v164
 [js-beautify issues]: https://github.com/beautify-web/js-beautify/issues
 [js-beautify options]: https://github.com/beautify-web/js-beautify#options
-[SASS Install]: http://sass-lang.com/install
 [MIT]: http://opensource.org/licenses/MIT

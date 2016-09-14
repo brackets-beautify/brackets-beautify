@@ -1,0 +1,5 @@
+test/
+.eslintignore
+.gitignore
+.eslintrc.yml
+*.zip

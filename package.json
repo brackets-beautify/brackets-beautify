@@ -6,12 +6,13 @@
     "engines": {
         "brackets": ">=1.7.0"
     },
-    "homepage": "https://github.com/drewhamlett/brackets-beautify",
+    "homepage": "https://github.com/brackets-beautify/brackets-beautify",
     "author": "Drew Hamlett <i@drewh.me> (https://github.com/drewhamlett)",
     "contributors": "Jan Pilzer (https://github.com/hirse)",
     "license": "MIT",
     "categories": "formatting",
     "keywords": [
+        "brackets-extension",
         "beautify",
         "beautifier",
         "format",
@@ -24,9 +25,7 @@
         "CSS",
         "XML",
         "HTML",
-        "SVG",
-        "sass",
-        "scss"
+        "SVG"
     ],
     "i18n": [
         "de",
