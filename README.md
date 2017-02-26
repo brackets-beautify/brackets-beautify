@@ -1,9 +1,9 @@
 [![Brackets Beautify on npm](https://img.shields.io/npm/v/brackets-beautify.svg?maxAge=2592000&style=flat-square)](https://www.npmjs.com/package/brackets-beautify)
 # Brackets Beautify 2.x
-[Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.6.4][js-beautify version].
+[Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.6.11][js-beautify version].
 
 ## Version Information
-We are currently having [trouble](https://github.com/adobe/brackets/issues/12464) uploading the latest version to the Brackets Extension Registry.  
+We are currently having [trouble](https://github.com/adobe/brackets/issues/12464) uploading the latest version to the Brackets Extension Registry.
 The last version on the Brackets Extension Registry is [1.2.0](https://github.com/brackets-beautify/brackets-beautify/tree/v1.2.0).
 
 
@@ -99,7 +99,7 @@ The sample `.brackets.json` below generally enables `Beautify on Save` and disab
 ```
 
 ### User Key Map for Beautify
-Open the `keymap.json` with the menu entry `Debug > Open User Key Map` and add an _overrides_ entry.  
+Open the `keymap.json` with the menu entry `Debug > Open User Key Map` and add an _overrides_ entry.
 For example:
 ```js
 {
@@ -146,7 +146,7 @@ Additionally, external formatters can be added to Brackets Beautify by modifying
     }
 }
 ```
-The key is a name that can be use to configure the language where this formatter should be used.  
+The key is a name that can be use to configure the language where this formatter should be used.
 The `command` is executed on a shell and gets the filename as last command line argument.
 
 
@@ -166,7 +166,7 @@ Brackets Beautify is licensed under the [MIT license][MIT]. [js-beautify][js-bea
 [Beautify Beautify on Save]: https://github.com/brackets-beautify/brackets-beautify#file-options-for-beautify-on-save
 [Beautify latest release]: https://github.com/brackets-beautify/brackets-beautify/releases/latest
 [js-beautify]: https://github.com/beautify-web/js-beautify
-[js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v164
+[js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v1611
 [js-beautify issues]: https://github.com/beautify-web/js-beautify/issues
 [js-beautify options]: https://github.com/beautify-web/js-beautify#options
 [MIT]: http://opensource.org/licenses/MIT

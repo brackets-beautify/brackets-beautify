@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
+## Unreleased
+### Changed
+- Updated js-beautify to version 1.6.11
+
+
 ## 2.3.0 - 2016-09-04
 ### Added
 - Farsi (Persian) Translation
