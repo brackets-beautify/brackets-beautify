@@ -111,44 +111,57 @@ For example:
 ```
 
 ### Configure languages
-Brackets Beautify comes with beautifiers for JavaScript, HTML and CSS. You can add languages by adding their ids to the `bb.beautify.languages` setting:
+Brackets Beautify comes with beautifiers for JavaScript, HTML and CSS:
+```json
+{
+    "css": "css",
+    "ejs": "html",
+    "handlebars": "html",
+    "html": "html",
+    "javascript": "js",
+    "json": "js",
+    "jsx": "js",
+    "less": "css",
+    "php": "html",
+    "scss": "css",
+    "svg": "html",
+    "vue": "html",
+    "xml": "html"
+}
+```
+
+You can add languages or change their assigned beautifiers by adding their ids to the `bb.beautify.languages` setting:
 ```json
 {
     "bb.beautify.languages": {
-        "css": "css",
-        "ejs": "html",
-        "handlebars": "html",
-        "html": "html",
-        "javascript": "js",
-        "json": "js",
-        "jsx": "js",
-        "less": "css",
-        "php": "html",
-        "scss": "css",
-        "svg": "html",
-        "vue": "html",
-        "xml": "html"
+        "<LANGUAGE_ID>": "<BEAUTIFIER_ID>"
     }
 }
 ```
+
+The language id for the current document can be found by using the following command in the Brackets DeveloperTools:
+```js
+brackets.getModule('document/DocumentManager').getCurrentDocument().getLanguage().getId();
+```
+
+The beautifier id has to be either one of the bundled beautifiers (`js`, `css`, or `html`) or one that was defined as [external formatter][Beautify External Formatters].
 
 ### External formatters
 Additionally, external formatters can be added to Brackets Beautify by modifying the `bb.beautify.beautifiers` setting.
 ```json
 {
     "bb.beautify.beautifiers": {
-        "formatterName": {
-            "command": "/path/to/file --with args"
+        "<BEAUTIFIER_ID>": {
+            "<COMMAND>": "/path/to/file --with args"
         }
     },
     "bb.beautify.languages": {
-        ⋮
-        "languageId": "formatterName"
+        "<LANGUAGE_ID>": "<BEAUTIFIER_ID>"
     }
 }
 ```
 The key is a name that can be use to configure the language where this formatter should be used.
-The `command` is executed on a shell and gets the filename as last command line argument.
+The `<COMMAND>` is executed on a shell and gets the filename as last command line argument.
 
 
 ## Issues
@@ -165,6 +178,7 @@ Brackets Beautify is licensed under the [MIT license][MIT]. [js-beautify][js-bea
 [Brackets npm Registry]: https://github.com/zaggino/brackets-npm-registry
 [Beautify User Key Map]: https://github.com/brackets-beautify/brackets-beautify#user-key-map-for-beautify
 [Beautify Beautify on Save]: https://github.com/brackets-beautify/brackets-beautify#file-options-for-beautify-on-save
+[Beautify External Formatters]: https://github.com/brackets-beautify/brackets-beautify#external-formatters
 [Beautify latest release]: https://github.com/brackets-beautify/brackets-beautify/releases/latest
 [js-beautify]: https://github.com/beautify-web/js-beautify
 [js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v1611

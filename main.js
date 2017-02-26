@@ -23,6 +23,23 @@ define(function (require, exports, module) {
             key: 'Ctrl-Alt-B'
         }
     ];
+    var LANGUAGE_MAPPING = {
+        javascript: 'js',
+        json: 'js',
+        jsx: 'js',
+
+        html: 'html',
+        xml: 'html',
+        svg: 'html',
+        php: 'html',
+        ejs: 'html',
+        handlebars: 'html',
+        vue: 'html',
+
+        css: 'css',
+        less: 'css',
+        scss: 'css'
+    };
 
     /* beautify preserve:start *//* eslint-disable no-multi-spaces */
     var CommandManager     = brackets.getModule('command/CommandManager');
@@ -78,7 +95,8 @@ define(function (require, exports, module) {
 
     function format(autoSave) {
         var document = DocumentManager.getCurrentDocument();
-        var beautifier = prefs.get(PREF_LANGUAGES_ID)[document.getLanguage().getId()];
+        var beautifiers = $.extend({}, LANGUAGE_MAPPING, prefs.get(PREF_LANGUAGES_ID));
+        var beautifier = beautifiers[document.getLanguage().getId()];
 
         if (!beautifier && !autoSave) {
             var Dialog = Dialogs.showModalDialog(DefaultDialogs.DIALOG_ID_ERROR, Strings.UNSUPPORTED_TITLE, DialogContent);
@@ -232,23 +250,7 @@ define(function (require, exports, module) {
             return !value.js && !value.html && !value.css;
         }
     });
-    prefs.definePreference(PREF_LANGUAGES_ID, 'object', {
-        javascript: 'js',
-        json: 'js',
-        jsx: 'js',
-
-        html: 'html',
-        xml: 'html',
-        svg: 'html',
-        php: 'html',
-        ejs: 'html',
-        handlebars: 'html',
-        vue: 'html',
-
-        css: 'css',
-        less: 'css',
-        scss: 'css'
-    }, {
+    prefs.definePreference(PREF_LANGUAGES_ID, 'object', LANGUAGE_MAPPING, {
         name: Strings.PREF_LANGUAGES_NAME,
         description: Strings.PREF_LANGUAGES_DESC
     });

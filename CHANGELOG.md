@@ -5,10 +5,11 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 ### Added
-- Format JSX as JavaScript
+- Format JSX as JavaScript (see [#234](https://github.com/brackets-beautify/brackets-beautify/issues/234))
 
 ### Changed
-- Updated js-beautify to version 1.6.11
+- Updated js-beautify to version 1.6.11 (see [#235](https://github.com/brackets-beautify/brackets-beautify/issues/235))
+- Extend language-beautifier mapping instead of replacing it
 
 
 ## 2.3.0 - 2016-09-04
