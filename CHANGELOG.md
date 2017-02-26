@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
-## Unreleased
+## 2.4.0 - 2017-02-26
 ### Added
 - Format JSX as JavaScript (see [#234](https://github.com/brackets-beautify/brackets-beautify/issues/234))
 
