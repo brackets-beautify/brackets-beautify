@@ -235,6 +235,7 @@ define(function (require, exports, module) {
     prefs.definePreference(PREF_LANGUAGES_ID, 'object', {
         javascript: 'js',
         json: 'js',
+        jsx: 'js',
 
         html: 'html',
         xml: 'html',

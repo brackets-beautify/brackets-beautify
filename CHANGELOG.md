@@ -4,6 +4,9 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
 ## Unreleased
+### Added
+- Format JSX as JavaScript
+
 ### Changed
 - Updated js-beautify to version 1.6.11
 

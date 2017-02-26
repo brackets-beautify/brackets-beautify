@@ -121,6 +121,7 @@ Brackets Beautify comes with beautifiers for JavaScript, HTML and CSS. You can a
         "html": "html",
         "javascript": "js",
         "json": "js",
+        "jsx": "js",
         "less": "css",
         "php": "html",
         "scss": "css",
