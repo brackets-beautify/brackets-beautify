@@ -2,15 +2,9 @@
 # Brackets Beautify 2.x
 [Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.6.11][js-beautify version].
 
-## Version Information
-We are currently having [trouble](https://github.com/adobe/brackets/issues/12464) uploading the latest version to the Brackets Extension Registry.
-The last version on the Brackets Extension Registry is [1.2.0](https://github.com/brackets-beautify/brackets-beautify/tree/v1.2.0).
-
-
 ## Installation
 ### Latest Release
-To install the latest _release_ of this extension use the `Install from URL...` function of the Brackets [Extension Manager][Brackets Extension Manager].
-The link can be found on our [Release-page][Beautify latest release].
+To install the latest _release_ of this extension use the built-in Brackets [Extension Manager][Brackets Extension Manager] which downloads the extension from the [extension registry][Brackets Extension Registry].
 
 ### Latest Commit
 To install the latest _commit_ of this extension use the built-in Brackets [Extension Manager][Brackets Extension Manager] which has a function to `Install from URL...` using this link:
