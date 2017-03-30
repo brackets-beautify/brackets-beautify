@@ -50,8 +50,10 @@ The default is defined in `default.jsbeautifyrc` and looks like this:
     "css": {
         "eol": "\n",
         "end_with_newline": true,
+        "preserve_newlines": true,
         "selector_separator_newline": true,
-        "newline_between_rules": true
+        "newline_between_rules": true,
+        "space_around_selector_separator": true
     },
     "html": {
         "eol": "\n",
