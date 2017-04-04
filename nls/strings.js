@@ -9,6 +9,7 @@ define(function (require, exports, module) {
         it: true,
         ja: true,
         ro: true,
-        'zh-cn': true
+        'zh-cn': true,
+        ru: true
     };
 });

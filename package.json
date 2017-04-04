@@ -39,7 +39,8 @@
     "it",
     "ja",
     "ro",
-    "zh-cn"
+    "zh-cn",
+    "ru"
   ],
   "package-i18n": {
     "de": {
@@ -56,6 +57,9 @@
     },
     "zh-cn": {
       "description": "格式化JavaScript, HTML, CSS文件以及相关的语言。"
+    },
+    "ru": {
+      "description": "Форматируйте JavaScript, HTML, файлы CSS и другие поддерживаемые языки"
     }
   }
 }
