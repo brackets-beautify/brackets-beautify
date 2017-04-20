@@ -5,7 +5,7 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 ## Unreleased
 ### Changed
-- Updated js-beautify to version 1.6.11 (see [#241](https://github.com/brackets-beautify/brackets-beautify/issues/241))
+- Updated js-beautify to version 1.6.12 (see [#241](https://github.com/brackets-beautify/brackets-beautify/issues/241))
 
 
 ## 2.4.0 - 2017-02-26
@@ -19,10 +19,10 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 ## 2.3.0 - 2016-09-04
 ### Added
-- Farsi (Persian) Translation
+- Farsi (Persian) Translation, thanks to [__@Rezaaa__](https://github.com/Rezaaa)
 
 ### Changed
-- Updated Italian Translation
+- Updated Italian Translation, thanks to [__@Denisov21__](https://github.com/Denisov21)
 - Updated js-beautify to version 1.6.4
 
 
