@@ -50,7 +50,7 @@ define(function (require, exports, module) {
     var EditorManager      = brackets.getModule('editor/EditorManager');
     var FileSystem         = brackets.getModule('filesystem/FileSystem');
     var LanguageManager    = brackets.getModule('language/LanguageManager');
-    var LiveDevelopment    = brackets.getModule('LiveDevelopment/LiveDevelopment');
+    var LiveDevelopment;
     var PreferencesManager = brackets.getModule('preferences/PreferencesManager');
     var ProjectManager     = brackets.getModule('project/ProjectManager');
     var Mustache           = brackets.getModule('thirdparty/mustache/mustache');
@@ -76,6 +76,23 @@ define(function (require, exports, module) {
 
     ExtensionUtils.loadStyleSheet(module, 'styles/styles.css');
     var prefs = PreferencesManager.getExtensionPrefs(PREFIX);
+
+    /**
+     * Check if LiveDevelopment is currently active.
+     * The LiveDevelopment module has to be requested conditionally as Brackets-Electron doesn't support it.
+     * See https://github.com/zaggino/brackets-electron/issues/25
+     * @returns {boolean} True, if LiveDevelopment is currently active.
+     */
+    function isLiveDevelopmentActive() {
+        if (window.electron) {
+            return false;
+        } else {
+            if (!LiveDevelopment) {
+                LiveDevelopment = brackets.getModule('LiveDevelopment/LiveDevelopment');
+            }
+            return LiveDevelopment.status === LiveDevelopment.STATUS_ACTIVE;
+        }
+    }
 
     function batchUpdate(formattedText, range) {
         var editor = EditorManager.getCurrentFullEditor();
@@ -144,7 +161,7 @@ define(function (require, exports, module) {
              * NOTE: Currently it is only checked if LiveDevelopment is active in general as I don't know how to check
              * for a specific file (see https://groups.google.com/forum/#!topic/brackets-dev/9wEtqG684cI).
              */
-            if (document.getLanguage().getId() === 'html' && LiveDevelopment.status === LiveDevelopment.STATUS_ACTIVE) {
+            if (document.getLanguage().getId() === 'html' && isLiveDevelopmentActive()) {
                 // Regex to match everything inside <html> beginning by the first tag and ending at the last
                 var match = /((?:.|\n)*<html[^>]*>\s*)((?:.|\n)*?)(\s*<\/html>)/gm.exec(unformattedText);
                 if (match) {
