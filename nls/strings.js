@@ -8,6 +8,7 @@ define(function (require, exports, module) {
         fa: true,
         it: true,
         ja: true,
+        pl: true,
         ro: true,
         'zh-cn': true,
         ru: true
