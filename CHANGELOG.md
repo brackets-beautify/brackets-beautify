@@ -3,10 +3,9 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
-## Unreleased
+## 2.4.1 - 2017-07-07
 ### Changed
-- Updated js-beautify to version 1.6.12 (see [#241](https://github.com/brackets-beautify/brackets-beautify/issues/241))
-
+- Updated js-beautify to version 1.6.14
 
 ### Fixed
 - Support Brackets-Electron by requesting LiveDevelopment conditionally (see [#246](https://github.com/brackets-beautify/brackets-beautify/issues/246))
