@@ -65,5 +65,11 @@
     "ru": {
       "description": "Форматируйте JavaScript, HTML, файлы CSS и другие поддерживаемые языки"
     }
+  },
+  "devDependencies": {
+    "eslint": "^4.7.2"
+  },
+  "scripts": {
+    "lint": "eslint ."
   }
 }
