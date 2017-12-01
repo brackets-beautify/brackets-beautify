@@ -181,7 +181,7 @@ Brackets Beautify is licensed under the [MIT license][MIT]. [js-beautify][js-bea
 [Beautify External Formatters]: https://github.com/brackets-beautify/brackets-beautify#external-formatters
 [Beautify latest release]: https://github.com/brackets-beautify/brackets-beautify/releases/latest
 [js-beautify]: https://github.com/beautify-web/js-beautify
-[js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v173
+[js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v174
 [js-beautify issues]: https://github.com/beautify-web/js-beautify/issues
 [js-beautify options]: https://github.com/beautify-web/js-beautify#options
 [MIT]: http://opensource.org/licenses/MIT
