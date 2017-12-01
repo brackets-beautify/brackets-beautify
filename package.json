@@ -72,6 +72,7 @@
   },
   "scripts": {
     "bundle:win": "npm pack && tar2zip brackets-beautify-%npm_package_version%.tgz",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test": "npm run lint"
   }
 }

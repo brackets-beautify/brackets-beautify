@@ -2,6 +2,8 @@
 [![Brackets Extension Registry Version](https://badges.ml/brackets-beautify/version.svg)](https://brackets-extension-badges.github.io#brackets-beautify)
 [![Brackets Extension Registry Downloads](https://badges.ml/brackets-beautify/total.svg)](https://brackets-extension-badges.github.io#brackets-beautify)
 
+[![Build Status](https://travis-ci.org/brackets-beautify/brackets-beautify.svg?branch=master)](https://travis-ci.org/brackets-beautify/brackets-beautify)
+
 
 # Brackets Beautify 2.x
 [Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.7.4][js-beautify version].
