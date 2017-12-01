@@ -4,5 +4,6 @@ test/
 .eslintignore
 .eslintrc.yml
 .gitignore
+.travis.yml
 *.tgz
 *.zip
