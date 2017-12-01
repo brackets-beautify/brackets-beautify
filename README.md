@@ -103,7 +103,7 @@ The sample `.brackets.json` below generally enables `Beautify on Save` and disab
 ### User Key Map for Beautify
 Open the `keymap.json` with the menu entry `Debug > Open User Key Map` and add an _overrides_ entry.
 For example:
-```js
+```json
 {
     "documentation": "https://github.com/adobe/brackets/wiki/User-Key-Bindings",
     "overrides": {
