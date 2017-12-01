@@ -1,7 +1,7 @@
 [![Brackets Beautify on npm](https://img.shields.io/npm/v/brackets-beautify.svg?maxAge=2592000&style=flat-square)](https://www.npmjs.com/package/brackets-beautify)
 
 # Brackets Beautify 2.x
-[Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.7.3][js-beautify version].
+[Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.7.4][js-beautify version].
 
 ## Installation
 ### Latest Release
