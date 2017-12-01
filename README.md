@@ -1,4 +1,7 @@
-[![Brackets Beautify on npm](https://img.shields.io/npm/v/brackets-beautify.svg?maxAge=2592000&style=flat-square)](https://www.npmjs.com/package/brackets-beautify)
+[![npm Version](https://img.shields.io/npm/v/brackets-beautify.svg)](https://www.npmjs.com/package/brackets-beautify)
+[![Brackets Extension Registry Version](https://badges.ml/brackets-beautify/version.svg)](https://brackets-extension-badges.github.io#brackets-beautify)
+[![Brackets Extension Registry Downloads](https://badges.ml/brackets-beautify/total.svg)](https://brackets-extension-badges.github.io#brackets-beautify)
+
 
 # Brackets Beautify 2.x
 [Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.7.4][js-beautify version].
@@ -170,7 +173,7 @@ Brackets Beautify is licensed under the [MIT license][MIT]. [js-beautify][js-bea
 
 [Brackets]: http://brackets.io
 [Brackets Extension Manager]: https://github.com/adobe/brackets/wiki/Brackets-Extensions
-[Brackets Extension Registry]: https://brackets-registry.aboutweb.com
+[Brackets Extension Registry]: https://registry.brackets.io
 [Brackets preferences]: https://github.com/adobe/brackets/wiki/How-to-Use-Brackets#preferences
 [Brackets npm Registry]: https://github.com/zaggino/brackets-npm-registry
 [Beautify User Key Map]: https://github.com/brackets-beautify/brackets-beautify#user-key-map-for-beautify
