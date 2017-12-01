@@ -1,5 +1,8 @@
+.github/
 test/
+.editorconfig
 .eslintignore
-.gitignore
 .eslintrc.yml
+.gitignore
+*.tgz
 *.zip
