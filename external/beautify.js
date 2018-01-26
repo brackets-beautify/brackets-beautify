@@ -11,7 +11,7 @@ define(function (require, exports, module) {
 
     function beautify(options, unformattedText, callback) {
         var fullPath = DocumentManager.getCurrentDocument().file.fullPath;
-        domain.exec('beautify', options, fullPath).done(function (formattedText) {
+        domain.exec('beautify', options, JSON.stringify(fullPath)).done(function (formattedText) {
             callback(null, formattedText);
         }).fail(function (err) {
             callback(err, unformattedText);
