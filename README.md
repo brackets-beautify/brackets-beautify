@@ -80,7 +80,7 @@ Brackets Beautify leverages [Brackets preferences][Brackets preferences], which 
 
 Brackets Beautify also support per language settings, which enables you to enable/disabled `Beautify on Save` for your documents using the Brackets language layer.
 
-The sample `.brackets.json` below generally enables `Beautify on Save` and disables it for any JavaScript file in `thirdparty`, any JavaScript file whose filename contains `min` and any PHP file.
+The sample `.brackets.json` below generally enables `Beautify on Save` and disables it for any JavaScript file in `thirdparty`, any JavaScript file whose filename contains `min`, and any PHP file.
 ```json
 {
     "bb.beautify.onSave": true,
@@ -113,7 +113,7 @@ For example:
 ```
 
 ### Configure languages
-Brackets Beautify comes with beautifiers for JavaScript, HTML and CSS:
+Brackets Beautify comes with beautifiers for JavaScript, HTML, and CSS:
 ```json
 {
     "css": "css",
@@ -132,7 +132,7 @@ Brackets Beautify comes with beautifiers for JavaScript, HTML and CSS:
 }
 ```
 
-You can add languages or change their assigned beautifiers by adding their ids to the `bb.beautify.languages` setting:
+You can add languages or change their assigned beautifiers by adding their language ids to the `bb.beautify.languages` setting:
 ```json
 {
     "bb.beautify.languages": {
@@ -141,7 +141,7 @@ You can add languages or change their assigned beautifiers by adding their ids t
 }
 ```
 
-The language id for the current document can be found by using the following command in the Brackets DeveloperTools:
+The language id for the current document can be found by using the following command in the Brackets Developer Tools:
 ```js
 brackets.getModule('document/DocumentManager').getCurrentDocument().getLanguage().getId();
 ```
@@ -149,7 +149,7 @@ brackets.getModule('document/DocumentManager').getCurrentDocument().getLanguage(
 The beautifier id has to be either one of the bundled beautifiers (`js`, `css`, or `html`) or one that was defined as [external formatter][Beautify External Formatters].
 
 ### External formatters
-Additionally, external formatters can be added to Brackets Beautify by modifying the `bb.beautify.beautifiers` setting.
+Additionally, external formatters can be added to Brackets Beautify by modifying the `bb.beautify.beautifiers` setting:
 ```json
 {
     "bb.beautify.beautifiers": {
@@ -164,6 +164,8 @@ Additionally, external formatters can be added to Brackets Beautify by modifying
 ```
 The key is a name that can be use to configure the language where this formatter should be used.
 The `<COMMAND>` is executed on a shell and gets the filename as last command line argument.
+
+See the [Wiki][Wiki] for help on common configurations.
 
 
 ## Issues
@@ -187,3 +189,4 @@ Brackets Beautify is licensed under the [MIT license][MIT]. [js-beautify][js-bea
 [js-beautify issues]: https://github.com/beautify-web/js-beautify/issues
 [js-beautify options]: https://github.com/beautify-web/js-beautify#options
 [MIT]: http://opensource.org/licenses/MIT
+[Wiki]: https://github.com/brackets-beautify/brackets-beautify/wiki
