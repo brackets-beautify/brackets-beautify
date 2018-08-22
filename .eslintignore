@@ -1,1 +1,3 @@
 thirdparty/**/*.js
+build/*.js
+

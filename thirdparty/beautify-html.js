@@ -1,3 +1,5 @@
+// copied from js-beautify/js/lib/beautify-html.js
+// version: 1.7.5
 /*jshint curly:false, eqeqeq:true, laxbreak:true, noempty:false */
 /* AUTO-GENERATED. DO NOT MODIFY. */
 /*
