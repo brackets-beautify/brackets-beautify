@@ -1,4 +1,5 @@
 .github/
+build/
 test/
 .editorconfig
 .eslintignore

@@ -68,10 +68,13 @@
   },
   "devDependencies": {
     "eslint": "4.19.x",
+    "js-beautify": "^1.7.5",
     "tar-to-zip": "2.0.x"
   },
   "scripts": {
     "bundle:win": "npm pack && tar2zip brackets-beautify-%npm_package_version%.tgz",
+    "update-jsbeautify": "npm install js-beautify && node ./build/update-jsbeautify.js",
+    "update-jsbeautify-next": "npm install js-beautify@next && node ./build/update-jsbeautify.js",
     "lint": "eslint .",
     "test": "npm run lint"
   }
