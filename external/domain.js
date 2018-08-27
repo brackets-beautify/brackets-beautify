@@ -1,13 +1,10 @@
-/* eslint-env node */
-/* eslint-disable strict */
-
 (function () {
     'use strict';
 
     var exec = require('child_process').exec;
 
     function beautify(options, filePath, callback) {
-        exec(options.command + ' ' + filePath, function (error, stdout, stderr) {
+        exec(options.command + ' ' + filePath, function (error, stdout) {
             return callback(error, stdout);
         });
     }

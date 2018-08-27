@@ -1,0 +1,16 @@
+{
+  "extends": "eslint:recommended",
+  "env": {
+    "browser": true,
+    "amd": true,
+    "jquery": true
+  },
+  "globals": {
+    "brackets": false
+  },
+  "rules": {
+    "no-console": "off",
+    "semi": "warn",
+    "quotes": ["warn", "single"]
+  }
+}

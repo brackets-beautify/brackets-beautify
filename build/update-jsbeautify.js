@@ -38,7 +38,7 @@ function readFile(path) {
             } else {
                 resolve(data.toString());
             }
-        })
+        });
     });
 }
 
@@ -56,7 +56,7 @@ function writeFile(path, data) {
             } else {
                 resolve();
             }
-        })
+        });
     });
 }
 
