@@ -1,5 +1,5 @@
 // copied from js-beautify/js/lib/beautify-html.js
-// version: 1.8.0
+// version: 1.8.1
 /*jshint curly:false, eqeqeq:true, laxbreak:true, noempty:false */
 /* AUTO-GENERATED. DO NOT MODIFY. */
 /*
@@ -1464,7 +1464,7 @@ function Beautifier(source_text, options, js_beautify, css_beautify) {
 
   this._options = Object.assign({}, options);
 
-  this._options.indent_inner_html = (options.indent_inner_html === undefined) ? true : options.indent_inner_html;
+  this._options.indent_inner_html = (options.indent_inner_html === undefined) ? false : options.indent_inner_html;
   this._options.indent_body_inner_html = (options.indent_body_inner_html === undefined) ? true : options.indent_body_inner_html;
   this._options.indent_head_inner_html = (options.indent_head_inner_html === undefined) ? true : options.indent_head_inner_html;
   this._options.indent_size = (options.indent_size === undefined) ? 4 : parseInt(options.indent_size, 10);
@@ -1609,12 +1609,8 @@ Beautifier.prototype._handle_tag_close = function(printer, raw_token, last_tag_t
 
   if (last_tag_token.indent_content &&
     !(last_tag_token.is_unformatted || last_tag_token.is_content_unformatted)) {
-    if (last_tag_token.tag_start_char === '{' ||
-      ((this._options.indent_body_inner_html || last_tag_token.tag_name !== 'body') &&
-        (this._options.indent_head_inner_html || last_tag_token.tag_name !== 'head'))) {
 
-      printer.indent();
-    }
+    printer.indent();
 
     // only indent once per opened tag
     last_tag_token.indent_content = false;
@@ -1897,8 +1893,17 @@ Beautifier.prototype._set_tag_position = function(printer, raw_token, parser_tok
       printer.print_newline(false);
     }
   } else { // it's a start-tag
-    parser_token.indent_content = parser_token.tag_check !== 'html' &&
-      !parser_token.custom_beautifier;
+    parser_token.indent_content = !parser_token.custom_beautifier;
+
+    if (parser_token.tag_start_char === '<') {
+      if (parser_token.tag_name === 'html') {
+        parser_token.indent_content = this._options.indent_inner_html;
+      } else if (parser_token.tag_name === 'head') {
+        parser_token.indent_content = this._options.indent_head_inner_html;
+      } else if (parser_token.tag_name === 'body') {
+        parser_token.indent_content = this._options.indent_body_inner_html;
+      }
+    }
 
     if (!parser_token.is_inline_element && last_token.type !== 'TK_CONTENT') {
       if (parser_token.parent) {
