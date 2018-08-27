@@ -1,7 +1,7 @@
 {
   "name": "brackets-beautify",
   "title": "Beautify",
-  "version": "2.5.2",
+  "version": "2.6.0",
   "description": "Format JavaScript, HTML, and CSS files and related languages.",
   "engines": {
     "brackets": ">=1.7.0"
@@ -68,13 +68,13 @@
   },
   "devDependencies": {
     "eslint": "4.19.x",
-    "js-beautify": "1.7.5",
+    "js-beautify": "1.8.0",
     "tar-to-zip": "2.0.x"
   },
   "scripts": {
     "bundle:win": "npm pack && tar2zip brackets-beautify-%npm_package_version%.tgz",
-    "update-jsbeautify": "npm install js-beautify && node ./build/update-jsbeautify.js",
-    "update-jsbeautify-next": "npm install js-beautify@next && node ./build/update-jsbeautify.js",
+    "update-jsbeautify": "npm install js-beautify -E && node ./build/update-jsbeautify.js",
+    "update-jsbeautify-next": "npm install js-beautify@next -E && node ./build/update-jsbeautify.js",
     "lint": "eslint .",
     "test": "npm run lint"
   }

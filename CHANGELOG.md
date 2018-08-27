@@ -3,24 +3,29 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
+## 2.6.0 - 2018-08-27
+### Changed
+- Updated `js-beautify` to version 1.8.0
+
+
 ## 2.5.2 - 2018-05-20
 ### Changed
-- Updated js-beautify to version 1.7.5
+- Updated `js-beautify` to version 1.7.5
 
 
 ## 2.5.1 - 2017-11-30
 ### Changed
-- Updated js-beautify to version 1.7.4
+- Updated `js-beautify` to version 1.7.4
 
 
 ## 2.5.0 - 2017-09-24
 ### Changed
-- Updated js-beautify to version 1.7.3
+- Updated `js-beautify` to version 1.7.3
 
 
 ## 2.4.1 - 2017-07-07
 ### Changed
-- Updated js-beautify to version 1.6.14
+- Updated `js-beautify` to version 1.6.14
 
 ### Fixed
 - Support Brackets-Electron by requesting LiveDevelopment conditionally (see [#246](https://github.com/brackets-beautify/brackets-beautify/issues/246))
@@ -31,7 +36,7 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 - Format JSX as JavaScript (see [#234](https://github.com/brackets-beautify/brackets-beautify/issues/234))
 
 ### Changed
-- Updated js-beautify to version 1.6.11 (see [#235](https://github.com/brackets-beautify/brackets-beautify/issues/235))
+- Updated `js-beautify` to version 1.6.11 (see [#235](https://github.com/brackets-beautify/brackets-beautify/issues/235))
 - Extend language-beautifier mapping instead of replacing it
 
 
@@ -41,7 +46,7 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 ### Changed
 - Updated Italian Translation, thanks to [__@Denisov21__](https://github.com/Denisov21)
-- Updated js-beautify to version 1.6.4
+- Updated `js-beautify` to version 1.6.4
 
 
 ## 2.2.0 - 2016-06-12
@@ -60,7 +65,7 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 - Toolbar Button to Beautify
 
 ### Changed
-- Updated js-beautify to version 1.6.3
+- Updated `js-beautify` to version 1.6.3
 - Require Brackets 1.7.0
 
 
@@ -68,7 +73,7 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 ### Added
 - Use Brackets Preferences language and path layer to configure `Beautify on save`
 - Enable use of nested settings from `.jsbeautifyrc`
-- Provide settings to *css_beautify*
+- Provide settings to `css_beautify`
 - Format SVG as HTML
 - Define preference with description
 
@@ -88,4 +93,4 @@ This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 ## 1.2.0 - 2015-08-11
 ### Changed
-- Updated js-beautify to version 1.5.10
+- Updated `js-beautify` to version 1.5.10
