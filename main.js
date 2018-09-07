@@ -200,7 +200,7 @@ define(function (require, exports, module) {
     }
 
     function onSave(event, doc) {
-        if (doc.__beautifySaving) {
+        if (doc.isSaving || doc.__beautifySaving) {
             return;
         }
         var context = PreferencesManager._buildContext(doc.file.fullPath, doc.getLanguage().getId());
