@@ -2,11 +2,12 @@
 [![Brackets Extension Registry Version](https://badges.ml/brackets-beautify/version.svg)](https://brackets-extension-badges.github.io#brackets-beautify)
 [![Brackets Extension Registry Downloads](https://badges.ml/brackets-beautify/total.svg)](https://brackets-extension-badges.github.io#brackets-beautify)
 
-[![Build Status](https://travis-ci.org/brackets-beautify/brackets-beautify.svg?branch=master)](https://travis-ci.org/brackets-beautify/brackets-beautify) [![Greenkeeper badge](https://badges.greenkeeper.io/brackets-beautify/brackets-beautify.svg)](https://greenkeeper.io/)
+[![Build Status](https://travis-ci.org/brackets-beautify/brackets-beautify.svg?branch=master)](https://travis-ci.org/brackets-beautify/brackets-beautify)
+[![Greenkeeper badge](https://badges.greenkeeper.io/brackets-beautify/brackets-beautify.svg)](https://greenkeeper.io/)
 
 
 # Brackets Beautify
-[Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.8.1][js-beautify version].
+[Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.8.4][js-beautify version].
 
 ## Installation
 ### Latest Release
@@ -185,7 +186,7 @@ Brackets Beautify is licensed under the [MIT license][MIT]. [js-beautify][js-bea
 [Beautify External Formatters]: https://github.com/brackets-beautify/brackets-beautify#external-formatters
 [Beautify latest release]: https://github.com/brackets-beautify/brackets-beautify/releases/latest
 [js-beautify]: https://github.com/beautify-web/js-beautify
-[js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v181
+[js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v184
 [js-beautify issues]: https://github.com/beautify-web/js-beautify/issues
 [js-beautify options]: https://github.com/beautify-web/js-beautify#options
 [MIT]: http://opensource.org/licenses/MIT
