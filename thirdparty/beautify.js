@@ -1,5 +1,5 @@
 // copied from js-beautify/js/lib/beautify.js
-// version: 1.8.4
+// version: 1.8.6
 /* AUTO-GENERATED. DO NOT MODIFY. */
 /*
 
@@ -31,12 +31,12 @@
 ---------------
 
 
-  Written by Einar Lielmanis, <einar@jsbeautifier.org>
-      http://jsbeautifier.org/
+  Written by Einar Lielmanis, <einar@beautifier.io>
+      https://beautifier.io/
 
   Originally converted to javascript by Vital, <vital76@gmail.com>
   "End braces on own line" added by Chris J. Shull, <chrisjshull@gmail.com>
-  Parsing improvements for brace-less statements by Liam Newman <bitwiseman@gmail.com>
+  Parsing improvements for brace-less statements by Liam Newman <bitwiseman@beautifier.io>
 
 
   Usage:
@@ -1094,6 +1094,9 @@ Beautifier.prototype.handle_word = function(current_token) {
         this._output.space_before_token = true;
       } else if (reserved_word(this._flags.last_token, 'default') && this._last_last_text === 'export') {
         this._output.space_before_token = true;
+      } else if (this._flags.last_token.text === 'declare') {
+        // accomodates Typescript declare function formatting
+        this._output.space_before_token = true;
       } else {
         this.print_newline();
       }
@@ -1181,6 +1184,9 @@ Beautifier.prototype.handle_word = function(current_token) {
   } else if (prefix === 'NEWLINE') {
     if (reserved_array(this._flags.last_token, special_words)) {
       // no newline between 'return nnn'
+      this._output.space_before_token = true;
+    } else if (this._flags.last_token.text === 'declare' && reserved_array(current_token, ['var', 'let', 'const'])) {
+      // accomodates Typescript declare formatting
       this._output.space_before_token = true;
     } else if (this._flags.last_token.type !== TOKEN.END_EXPR) {
       if ((this._flags.last_token.type !== TOKEN.START_EXPR || !reserved_array(current_token, ['var', 'let', 'const'])) && this._flags.last_token.text !== ':') {

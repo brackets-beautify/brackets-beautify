@@ -3,9 +3,12 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
-## Unreleased
+## 2.6.2 - 2018-10-05
 ### Changed
-- Updated `js-beautify` to version 1.8.4
+- Updated `js-beautify` to version 1.8.6
+
+### Fixed
+- Attempted fix to save-loop by checking if document is being saved (see [#199](https://github.com/brackets-beautify/brackets-beautify/issues/199))
 
 
 ## 2.6.1 - 2018-08-27
