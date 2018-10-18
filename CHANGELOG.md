@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
+## 2.6.3 - 2018-10-18
+### Changed
+- Updated `js-beautify` to version 1.8.8
+
+
 ## 2.6.2 - 2018-10-05
 ### Changed
 - Updated `js-beautify` to version 1.8.6

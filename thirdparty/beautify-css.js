@@ -1,5 +1,5 @@
 // copied from js-beautify/js/lib/beautify-css.js
-// version: 1.8.6
+// version: 1.8.8
 /* AUTO-GENERATED. DO NOT MODIFY. */
 /*
 
@@ -471,6 +471,7 @@ Output.prototype.ensure_empty_line_above = function(starts_with, ends_with) {
 
 module.exports.Output = Output;
 
+
 /***/ }),
 /* 3 */,
 /* 4 */,
@@ -510,8 +511,7 @@ module.exports.Output = Output;
 
 
 function Options(options, merge_child_field) {
-  options = _mergeOpts(options, merge_child_field);
-  this.raw_options = _normalizeOpts(options);
+  this.raw_options = _mergeOpts(options, merge_child_field);
 
   // Support passing the source text back with no change
   this.disabled = this._get_boolean('disabled');
@@ -622,10 +622,10 @@ Options.prototype._is_valid_selection = function(result, selection_list) {
 // Example: obj = {a: 1, b: {a: 2}}
 //          mergeOpts(obj, 'b')
 //
-//          Returns: {a: 2, b: {a: 2}}
+//          Returns: {a: 2}
 function _mergeOpts(allOptions, childFieldName) {
   var finalOpts = {};
-  allOptions = allOptions || {};
+  allOptions = _normalizeOpts(allOptions);
   var name;
 
   for (name in allOptions) {
@@ -657,6 +657,7 @@ function _normalizeOpts(options) {
 module.exports.Options = Options;
 module.exports.normalizeOpts = _normalizeOpts;
 module.exports.mergeOpts = _mergeOpts;
+
 
 /***/ }),
 /* 7 */,
@@ -813,6 +814,7 @@ InputScanner.prototype.lookBack = function(testVal) {
 
 module.exports.InputScanner = InputScanner;
 
+
 /***/ }),
 /* 9 */,
 /* 10 */,
@@ -859,6 +861,7 @@ function css_beautify(source_text, options) {
 }
 
 module.exports = css_beautify;
+
 
 /***/ }),
 /* 13 */
@@ -1304,6 +1307,7 @@ Beautifier.prototype.beautify = function() {
 
 module.exports.Beautifier = Beautifier;
 
+
 /***/ }),
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -1355,6 +1359,7 @@ Options.prototype = new BaseOptions();
 
 
 module.exports.Options = Options;
+
 
 /***/ })
 /******/ ]);

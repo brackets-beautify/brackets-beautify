@@ -1,5 +1,5 @@
 // copied from js-beautify/js/lib/beautify-html.js
-// version: 1.8.6
+// version: 1.8.8
 /* AUTO-GENERATED. DO NOT MODIFY. */
 /*
 
@@ -481,6 +481,7 @@ Output.prototype.ensure_empty_line_above = function(starts_with, ends_with) {
 
 module.exports.Output = Output;
 
+
 /***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -541,6 +542,7 @@ function Token(type, text, newlines, whitespace_before) {
 
 module.exports.Token = Token;
 
+
 /***/ }),
 /* 4 */,
 /* 5 */,
@@ -579,8 +581,7 @@ module.exports.Token = Token;
 
 
 function Options(options, merge_child_field) {
-  options = _mergeOpts(options, merge_child_field);
-  this.raw_options = _normalizeOpts(options);
+  this.raw_options = _mergeOpts(options, merge_child_field);
 
   // Support passing the source text back with no change
   this.disabled = this._get_boolean('disabled');
@@ -691,10 +692,10 @@ Options.prototype._is_valid_selection = function(result, selection_list) {
 // Example: obj = {a: 1, b: {a: 2}}
 //          mergeOpts(obj, 'b')
 //
-//          Returns: {a: 2, b: {a: 2}}
+//          Returns: {a: 2}
 function _mergeOpts(allOptions, childFieldName) {
   var finalOpts = {};
-  allOptions = allOptions || {};
+  allOptions = _normalizeOpts(allOptions);
   var name;
 
   for (name in allOptions) {
@@ -726,6 +727,7 @@ function _normalizeOpts(options) {
 module.exports.Options = Options;
 module.exports.normalizeOpts = _normalizeOpts;
 module.exports.mergeOpts = _mergeOpts;
+
 
 /***/ }),
 /* 7 */,
@@ -881,6 +883,7 @@ InputScanner.prototype.lookBack = function(testVal) {
 
 
 module.exports.InputScanner = InputScanner;
+
 
 /***/ }),
 /* 9 */
@@ -1040,6 +1043,7 @@ Tokenizer.prototype._readWhitespace = function() {
 module.exports.Tokenizer = Tokenizer;
 module.exports.TOKEN = TOKEN;
 
+
 /***/ }),
 /* 10 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -1124,6 +1128,7 @@ TokenStream.prototype.add = function(token) {
 
 module.exports.TokenStream = TokenStream;
 
+
 /***/ }),
 /* 11 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -1192,6 +1197,7 @@ Directives.prototype.readIgnored = function(input) {
 
 module.exports.Directives = Directives;
 
+
 /***/ }),
 /* 12 */,
 /* 13 */,
@@ -1238,6 +1244,7 @@ function style_html(html_source, options, js_beautify, css_beautify) {
 }
 
 module.exports = style_html;
+
 
 /***/ }),
 /* 16 */
@@ -1489,6 +1496,8 @@ function Beautifier(source_text, options, js_beautify, css_beautify) {
   this._is_wrap_attributes_force_expand_multiline = (this._options.wrap_attributes === 'force-expand-multiline');
   this._is_wrap_attributes_force_aligned = (this._options.wrap_attributes === 'force-aligned');
   this._is_wrap_attributes_aligned_multiple = (this._options.wrap_attributes === 'aligned-multiple');
+  this._is_wrap_attributes_preserve = this._options.wrap_attributes.substr(0, 'preserve'.length) === 'preserve';
+  this._is_wrap_attributes_preserve_aligned = (this._options.wrap_attributes === 'preserve-aligned');
 }
 
 Beautifier.prototype.beautify = function() {
@@ -1605,12 +1614,19 @@ Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_
     }
 
     if (printer._output.space_before_token && last_tag_token.tag_start_char === '<') {
+      // Allow the current attribute to wrap
+      // Set wrapped to true if the line is wrapped
       var wrapped = printer.print_space_or_wrap(raw_token.text);
       if (raw_token.type === TOKEN.ATTRIBUTE) {
-        var indentAttrs = wrapped && !this._is_wrap_attributes_force;
+        if (this._is_wrap_attributes_preserve || this._is_wrap_attributes_preserve_aligned) {
+          printer.traverse_whitespace(raw_token);
+          wrapped = wrapped || raw_token.newlines !== 0;
+        }
+        // Save whether we have wrapped any attributes
+        last_tag_token.has_wrapped_attrs = last_tag_token.has_wrapped_attrs || wrapped;
 
         if (this._is_wrap_attributes_force) {
-          var force_first_attr_wrap = false;
+          var force_attr_wrap = last_tag_token.attr_count > 1;
           if (this._is_wrap_attributes_force_expand_multiline && last_tag_token.attr_count === 1) {
             var is_only_attribute = true;
             var peek_index = 0;
@@ -1624,16 +1640,13 @@ Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_
               peek_index += 1;
             } while (peek_index < 4 && peek_token.type !== TOKEN.EOF && peek_token.type !== TOKEN.TAG_CLOSE);
 
-            force_first_attr_wrap = !is_only_attribute;
+            force_attr_wrap = !is_only_attribute;
           }
 
-          if (last_tag_token.attr_count > 1 || force_first_attr_wrap) {
+          if (force_attr_wrap) {
             printer.print_newline(false);
-            indentAttrs = true;
+            last_tag_token.has_wrapped_attrs = true;
           }
-        }
-        if (indentAttrs) {
-          last_tag_token.has_wrapped_attrs = true;
         }
       }
     }
@@ -1718,7 +1731,7 @@ Beautifier.prototype._handle_tag_open = function(printer, raw_token, last_tag_to
   }
 
   //indent attributes an auto, forced, aligned or forced-align line-wrap
-  if (this._is_wrap_attributes_force_aligned || this._is_wrap_attributes_aligned_multiple) {
+  if (this._is_wrap_attributes_force_aligned || this._is_wrap_attributes_aligned_multiple || this._is_wrap_attributes_preserve_aligned) {
     parser_token.alignment_size = raw_token.text.length + 1;
   }
 
@@ -1988,6 +2001,7 @@ Beautifier.prototype._do_optional_end_element = function(parser_token) {
 
 module.exports.Beautifier = Beautifier;
 
+
 /***/ }),
 /* 17 */
 /***/ (function(module, exports, __webpack_require__) {
@@ -2034,7 +2048,7 @@ function Options(options) {
 
   this.indent_handlebars = this._get_boolean('indent_handlebars', true);
   this.wrap_attributes = this._get_selection('wrap_attributes',
-    ['auto', 'force', 'force-aligned', 'force-expand-multiline', 'aligned-multiple']);
+    ['auto', 'force', 'force-aligned', 'force-expand-multiline', 'aligned-multiple', 'preserve', 'preserve-aligned']);
   this.wrap_attributes_indent_size = this._get_number('wrap_attributes_indent_size', this.indent_size);
   this.extra_liners = this._get_array('extra_liners', ['head', 'body', '/html']);
 
@@ -2075,6 +2089,7 @@ Options.prototype = new BaseOptions();
 
 
 module.exports.Options = Options;
+
 
 /***/ }),
 /* 18 */
@@ -2369,6 +2384,7 @@ Tokenizer.prototype._read_content_word = function() {
 
 module.exports.Tokenizer = Tokenizer;
 module.exports.TOKEN = TOKEN;
+
 
 /***/ })
 /******/ ]);
