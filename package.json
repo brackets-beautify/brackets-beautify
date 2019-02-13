@@ -1,7 +1,7 @@
 {
   "name": "brackets-beautify",
   "title": "Beautify",
-  "version": "2.6.3",
+  "version": "2.6.4",
   "description": "Format JavaScript, HTML, and CSS files and related languages.",
   "engines": {
     "brackets": ">=1.7.0"
@@ -68,7 +68,7 @@
   },
   "devDependencies": {
     "eslint": "5.7.x",
-    "js-beautify": "1.8.8",
+    "js-beautify": "1.8.9",
     "tar-to-zip": "2.0.x"
   },
   "scripts": {

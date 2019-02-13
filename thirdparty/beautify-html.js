@@ -1,5 +1,5 @@
 // copied from js-beautify/js/lib/beautify-html.js
-// version: 1.8.8
+// version: 1.8.9
 /* AUTO-GENERATED. DO NOT MODIFY. */
 /*
 
@@ -1236,7 +1236,8 @@ module.exports.Directives = Directives;
 
 
 
-var Beautifier = __webpack_require__(16).Beautifier;
+var Beautifier = __webpack_require__(16).Beautifier,
+  Options = __webpack_require__(17).Options;
 
 function style_html(html_source, options, js_beautify, css_beautify) {
   var beautifier = new Beautifier(html_source, options, js_beautify, css_beautify);
@@ -1244,6 +1245,9 @@ function style_html(html_source, options, js_beautify, css_beautify) {
 }
 
 module.exports = style_html;
+module.exports.defaultOptions = function() {
+  return new Options();
+};
 
 
 /***/ }),
@@ -1564,7 +1568,10 @@ Beautifier.prototype.beautify = function() {
 };
 
 Beautifier.prototype._handle_tag_close = function(printer, raw_token, last_tag_token) {
-  var parser_token = { text: raw_token.text, type: raw_token.type };
+  var parser_token = {
+    text: raw_token.text,
+    type: raw_token.type
+  };
   printer.alignment_size = 0;
   last_tag_token.tag_complete = true;
 
@@ -1592,7 +1599,10 @@ Beautifier.prototype._handle_tag_close = function(printer, raw_token, last_tag_t
 };
 
 Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_token, tokens) {
-  var parser_token = { text: raw_token.text, type: raw_token.type };
+  var parser_token = {
+    text: raw_token.text,
+    type: raw_token.type
+  };
   printer.set_space_before_token(raw_token.newlines || raw_token.whitespace_before !== '');
   if (last_tag_token.is_unformatted) {
     printer.add_raw_token(raw_token);
@@ -1656,7 +1666,10 @@ Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_
 };
 
 Beautifier.prototype._handle_text = function(printer, raw_token, last_tag_token) {
-  var parser_token = { text: raw_token.text, type: 'TK_CONTENT' };
+  var parser_token = {
+    text: raw_token.text,
+    type: 'TK_CONTENT'
+  };
   if (last_tag_token.custom_beautifier) { //check if we need to format javascript
     this._print_custom_beatifier_text(printer, raw_token, last_tag_token);
   } else if (last_tag_token.is_unformatted || last_tag_token.is_content_unformatted) {
