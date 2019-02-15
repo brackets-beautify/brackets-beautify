@@ -67,7 +67,7 @@
     }
   },
   "devDependencies": {
-    "eslint": "5.7.x",
+    "eslint": "5.14.x",
     "js-beautify": "1.8.9",
     "tar-to-zip": "2.0.x"
   },
