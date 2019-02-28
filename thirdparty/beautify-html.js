@@ -1,5 +1,5 @@
 // copied from js-beautify/js/lib/beautify-html.js
-// version: 1.8.9
+// version: 1.9.0
 /* AUTO-GENERATED. DO NOT MODIFY. */
 /*
 
@@ -161,7 +161,7 @@ var legacy_beautify_html =
 /******/
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 15);
+/******/ 	return __webpack_require__(__webpack_require__.s = 18);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -173,7 +173,6 @@ var legacy_beautify_html =
 "use strict";
 /*jshint node:true */
 /*
-
   The MIT License (MIT)
 
   Copyright (c) 2007-2018 Einar Lielmanis, Liam Newman, and contributors.
@@ -207,9 +206,19 @@ function OutputLine(parent) {
   // use indent_count as a marker for this.__lines that have preserved indentation
   this.__indent_count = -1;
   this.__alignment_count = 0;
+  this.__wrap_point_index = 0;
+  this.__wrap_point_character_count = 0;
+  this.__wrap_point_indent_count = -1;
+  this.__wrap_point_alignment_count = 0;
 
   this.__items = [];
 }
+
+OutputLine.prototype.clone_empty = function() {
+  var line = new OutputLine(this.__parent);
+  line.set_indent(this.__indent_count, this.__alignment_count);
+  return line;
+};
 
 OutputLine.prototype.item = function(index) {
   if (index < 0) {
@@ -229,13 +238,46 @@ OutputLine.prototype.has_match = function(pattern) {
 };
 
 OutputLine.prototype.set_indent = function(indent, alignment) {
-  this.__indent_count = indent || 0;
-  this.__alignment_count = alignment || 0;
-  this.__character_count = this.__parent.baseIndentLength + this.__alignment_count + this.__indent_count * this.__parent.indent_length;
+  if (this.is_empty()) {
+    this.__indent_count = indent || 0;
+    this.__alignment_count = alignment || 0;
+    this.__character_count = this.__parent.get_indent_size(this.__indent_count, this.__alignment_count);
+  }
 };
 
-OutputLine.prototype.get_character_count = function() {
-  return this.__character_count;
+OutputLine.prototype._set_wrap_point = function() {
+  if (this.__parent.wrap_line_length) {
+    this.__wrap_point_index = this.__items.length;
+    this.__wrap_point_character_count = this.__character_count;
+    this.__wrap_point_indent_count = this.__parent.next_line.__indent_count;
+    this.__wrap_point_alignment_count = this.__parent.next_line.__alignment_count;
+  }
+};
+
+OutputLine.prototype._should_wrap = function() {
+  return this.__wrap_point_index &&
+    this.__character_count > this.__parent.wrap_line_length &&
+    this.__wrap_point_character_count > this.__parent.next_line.__character_count;
+};
+
+OutputLine.prototype._allow_wrap = function() {
+  if (this._should_wrap()) {
+    this.__parent.add_new_line();
+    var next = this.__parent.current_line;
+    next.set_indent(this.__wrap_point_indent_count, this.__wrap_point_alignment_count);
+    next.__items = this.__items.slice(this.__wrap_point_index);
+    this.__items = this.__items.slice(0, this.__wrap_point_index);
+
+    next.__character_count += this.__character_count - this.__wrap_point_character_count;
+    this.__character_count = this.__wrap_point_character_count;
+
+    if (next.__items[0] === " ") {
+      next.__items.splice(0, 1);
+      next.__character_count -= 1;
+    }
+    return true;
+  }
+  return false;
 };
 
 OutputLine.prototype.is_empty = function() {
@@ -252,14 +294,11 @@ OutputLine.prototype.last = function() {
 
 OutputLine.prototype.push = function(item) {
   this.__items.push(item);
-  this.__character_count += item.length;
-};
-
-OutputLine.prototype.push_raw = function(item) {
-  this.push(item);
   var last_newline_index = item.lastIndexOf('\n');
   if (last_newline_index !== -1) {
     this.__character_count = item.length - last_newline_index;
+  } else {
+    this.__character_count += item.length;
   }
 };
 
@@ -272,13 +311,19 @@ OutputLine.prototype.pop = function() {
   return item;
 };
 
-OutputLine.prototype.remove_indent = function() {
+
+OutputLine.prototype._remove_indent = function() {
   if (this.__indent_count > 0) {
     this.__indent_count -= 1;
-    this.__character_count -= this.__parent.indent_length;
+    this.__character_count -= this.__parent.indent_size;
   }
 };
 
+OutputLine.prototype._remove_wrap_indent = function() {
+  if (this.__wrap_point_indent_count > 0) {
+    this.__wrap_point_indent_count -= 1;
+  }
+};
 OutputLine.prototype.trim = function() {
   while (this.last() === ' ') {
     this.__items.pop();
@@ -289,64 +334,96 @@ OutputLine.prototype.trim = function() {
 OutputLine.prototype.toString = function() {
   var result = '';
   if (!this.is_empty()) {
-    if (this.__indent_count >= 0) {
-      result = this.__parent.get_indent_string(this.__indent_count);
-    }
-    if (this.__alignment_count >= 0) {
-      result += this.__parent.get_alignment_string(this.__alignment_count);
-    }
+    result = this.__parent.get_indent_string(this.__indent_count, this.__alignment_count);
     result += this.__items.join('');
   }
   return result;
 };
 
-function IndentCache(base_string, level_string) {
-  this.__cache = [base_string];
-  this.__level_string = level_string;
-}
-
-IndentCache.prototype.__ensure_cache = function(level) {
-  while (level >= this.__cache.length) {
-    this.__cache.push(this.__cache[this.__cache.length - 1] + this.__level_string);
-  }
-};
-
-IndentCache.prototype.get_level_string = function(level) {
-  this.__ensure_cache(level);
-  return this.__cache[level];
-};
-
-
-function Output(options, baseIndentString) {
-  var indent_string = options.indent_char;
-  if (options.indent_size > 1) {
-    indent_string = new Array(options.indent_size + 1).join(options.indent_char);
+function IndentStringCache(options, baseIndentString) {
+  this.__cache = [''];
+  this.__indent_size = options.indent_size;
+  this.__indent_string = options.indent_char;
+  if (!options.indent_with_tabs) {
+    this.__indent_string = new Array(options.indent_size + 1).join(options.indent_char);
   }
 
-  // Set to null to continue support for auto detection of base indent level.
+  // Set to null to continue support for auto detection of base indent
   baseIndentString = baseIndentString || '';
   if (options.indent_level > 0) {
-    baseIndentString = new Array(options.indent_level + 1).join(indent_string);
+    baseIndentString = new Array(options.indent_level + 1).join(this.__indent_string);
   }
 
-  this.__indent_cache = new IndentCache(baseIndentString, indent_string);
-  this.__alignment_cache = new IndentCache('', ' ');
-  this.baseIndentLength = baseIndentString.length;
-  this.indent_length = indent_string.length;
+  this.__base_string = baseIndentString;
+  this.__base_string_length = baseIndentString.length;
+}
+
+IndentStringCache.prototype.get_indent_size = function(indent, column) {
+  var result = this.__base_string_length;
+  column = column || 0;
+  if (indent < 0) {
+    result = 0;
+  }
+  result += indent * this.__indent_size;
+  result += column;
+  return result;
+};
+
+IndentStringCache.prototype.get_indent_string = function(indent_level, column) {
+  var result = this.__base_string;
+  column = column || 0;
+  if (indent_level < 0) {
+    indent_level = 0;
+    result = '';
+  }
+  column += indent_level * this.__indent_size;
+  this.__ensure_cache(column);
+  result += this.__cache[column];
+  return result;
+};
+
+IndentStringCache.prototype.__ensure_cache = function(column) {
+  while (column >= this.__cache.length) {
+    this.__add_column();
+  }
+};
+
+IndentStringCache.prototype.__add_column = function() {
+  var column = this.__cache.length;
+  var indent = 0;
+  var result = '';
+  if (this.__indent_size && column >= this.__indent_size) {
+    indent = Math.floor(column / this.__indent_size);
+    column -= indent * this.__indent_size;
+    result = new Array(indent + 1).join(this.__indent_string);
+  }
+  if (column) {
+    result += new Array(column + 1).join(' ');
+  }
+
+  this.__cache.push(result);
+};
+
+function Output(options, baseIndentString) {
+  this.__indent_cache = new IndentStringCache(options, baseIndentString);
   this.raw = false;
   this._end_with_newline = options.end_with_newline;
-
+  this.indent_size = options.indent_size;
+  this.wrap_line_length = options.wrap_line_length;
   this.__lines = [];
   this.previous_line = null;
   this.current_line = null;
+  this.next_line = new OutputLine(this);
   this.space_before_token = false;
+  this.non_breaking_space = false;
+  this.previous_token_wrapped = false;
   // initialize
   this.__add_outputline();
 }
 
 Output.prototype.__add_outputline = function() {
   this.previous_line = this.current_line;
-  this.current_line = new OutputLine(this);
+  this.current_line = this.next_line.clone_empty();
   this.__lines.push(this.current_line);
 };
 
@@ -354,12 +431,12 @@ Output.prototype.get_line_number = function() {
   return this.__lines.length;
 };
 
-Output.prototype.get_indent_string = function(level) {
-  return this.__indent_cache.get_level_string(level);
+Output.prototype.get_indent_string = function(indent, column) {
+  return this.__indent_cache.get_indent_string(indent, column);
 };
 
-Output.prototype.get_alignment_string = function(level) {
-  return this.__alignment_cache.get_level_string(level);
+Output.prototype.get_indent_size = function(indent, column) {
+  return this.__indent_cache.get_indent_size(indent, column);
 };
 
 Output.prototype.is_empty = function() {
@@ -383,28 +460,47 @@ Output.prototype.add_new_line = function(force_newline) {
 };
 
 Output.prototype.get_code = function(eol) {
-  var sweet_code = this.__lines.join('\n').replace(/[\r\n\t ]+$/, '');
+  this.trim(true);
+
+  // handle some edge cases where the last tokens
+  // has text that ends with newline(s)
+  var last_item = this.current_line.pop();
+  if (last_item) {
+    if (last_item[last_item.length - 1] === '\n') {
+      last_item = last_item.replace(/\n+$/g, '');
+    }
+    this.current_line.push(last_item);
+  }
 
   if (this._end_with_newline) {
-    sweet_code += '\n';
+    this.__add_outputline();
   }
+
+  var sweet_code = this.__lines.join('\n');
 
   if (eol !== '\n') {
     sweet_code = sweet_code.replace(/[\n]/g, eol);
   }
-
   return sweet_code;
+};
+
+Output.prototype.set_wrap_point = function() {
+  this.current_line._set_wrap_point();
 };
 
 Output.prototype.set_indent = function(indent, alignment) {
   indent = indent || 0;
   alignment = alignment || 0;
 
+  // Next line stores alignment values
+  this.next_line.set_indent(indent, alignment);
+
   // Never indent your first output indent at the start of the file
   if (this.__lines.length > 1) {
     this.current_line.set_indent(indent, alignment);
     return true;
   }
+
   this.current_line.set_indent();
   return false;
 };
@@ -413,35 +509,44 @@ Output.prototype.add_raw_token = function(token) {
   for (var x = 0; x < token.newlines; x++) {
     this.__add_outputline();
   }
+  this.current_line.set_indent(-1);
   this.current_line.push(token.whitespace_before);
-  this.current_line.push_raw(token.text);
+  this.current_line.push(token.text);
   this.space_before_token = false;
+  this.non_breaking_space = false;
+  this.previous_token_wrapped = false;
 };
 
 Output.prototype.add_token = function(printable_token) {
-  this.add_space_before_token();
+  this.__add_space_before_token();
   this.current_line.push(printable_token);
+  this.space_before_token = false;
+  this.non_breaking_space = false;
+  this.previous_token_wrapped = this.current_line._allow_wrap();
 };
 
-Output.prototype.add_space_before_token = function() {
+Output.prototype.__add_space_before_token = function() {
   if (this.space_before_token && !this.just_added_newline()) {
+    if (!this.non_breaking_space) {
+      this.set_wrap_point();
+    }
     this.current_line.push(' ');
   }
-  this.space_before_token = false;
 };
 
 Output.prototype.remove_indent = function(index) {
   var output_length = this.__lines.length;
   while (index < output_length) {
-    this.__lines[index].remove_indent();
+    this.__lines[index]._remove_indent();
     index++;
   }
+  this.current_line._remove_wrap_indent();
 };
 
 Output.prototype.trim = function(eat_newlines) {
   eat_newlines = (eat_newlines === undefined) ? false : eat_newlines;
 
-  this.current_line.trim(this.indent_string, this.baseIndentString);
+  this.current_line.trim();
 
   while (eat_newlines && this.__lines.length > 1 &&
     this.current_line.is_empty()) {
@@ -598,10 +703,20 @@ function Options(options, merge_child_field) {
     this.max_preserve_newlines = 0;
   }
 
-  this.indent_with_tabs = this._get_boolean('indent_with_tabs');
+  this.indent_with_tabs = this._get_boolean('indent_with_tabs', this.indent_char === '\t');
   if (this.indent_with_tabs) {
     this.indent_char = '\t';
-    this.indent_size = 1;
+
+    // indent_size behavior changed after 1.8.6
+    // It used to be that indent_size would be
+    // set to 1 for indent_with_tabs. That is no longer needed and
+    // actually doesn't make sense - why not use spaces? Further,
+    // that might produce unexpected behavior - tabs being used
+    // for single-column alignment. So, when indent_with_tabs is true
+    // and indent_size is 1, reset indent_size to 4.
+    if (this.indent_size === 1) {
+      this.indent_size = 4;
+    }
   }
 
   // Backwards compat with 1.3.x
@@ -765,6 +880,8 @@ module.exports.mergeOpts = _mergeOpts;
 
 
 
+var regexp_has_sticky = RegExp.prototype.hasOwnProperty('sticky');
+
 function InputScanner(input_string) {
   this.__input = input_string || '';
   this.__input_length = this.__input.length;
@@ -804,14 +921,32 @@ InputScanner.prototype.peek = function(index) {
   return val;
 };
 
+// This is a JavaScript only helper function (not in python)
+// Javascript doesn't have a match method
+// and not all implementation support "sticky" flag.
+// If they do not support sticky then both this.match() and this.test() method
+// must get the match and check the index of the match.
+// If sticky is supported and set, this method will use it.
+// Otherwise it will check that global is set, and fall back to the slower method.
+InputScanner.prototype.__match = function(pattern, index) {
+  pattern.lastIndex = index;
+  var pattern_match = pattern.exec(this.__input);
+
+  if (pattern_match && !(regexp_has_sticky && pattern.sticky)) {
+    if (pattern_match.index !== index) {
+      pattern_match = null;
+    }
+  }
+
+  return pattern_match;
+};
+
 InputScanner.prototype.test = function(pattern, index) {
   index = index || 0;
   index += this.__position;
-  pattern.lastIndex = index;
 
   if (index >= 0 && index < this.__input_length) {
-    var pattern_match = pattern.exec(this.__input);
-    return pattern_match && pattern_match.index === index;
+    return !!this.__match(pattern, index);
   } else {
     return false;
   }
@@ -820,13 +955,13 @@ InputScanner.prototype.test = function(pattern, index) {
 InputScanner.prototype.testChar = function(pattern, index) {
   // test one character regex match
   var val = this.peek(index);
+  pattern.lastIndex = 0;
   return val !== null && pattern.test(val);
 };
 
 InputScanner.prototype.match = function(pattern) {
-  pattern.lastIndex = this.__position;
-  var pattern_match = pattern.exec(this.__input);
-  if (pattern_match && pattern_match.index === this.__position) {
+  var pattern_match = this.__match(pattern, this.__position);
+  if (pattern_match) {
     this.__position += pattern_match[0].length;
   } else {
     pattern_match = null;
@@ -834,25 +969,30 @@ InputScanner.prototype.match = function(pattern) {
   return pattern_match;
 };
 
-InputScanner.prototype.read = function(pattern) {
+InputScanner.prototype.read = function(starting_pattern, until_pattern, until_after) {
   var val = '';
-  var match = this.match(pattern);
-  if (match) {
-    val = match[0];
+  var match;
+  if (starting_pattern) {
+    match = this.match(starting_pattern);
+    if (match) {
+      val += match[0];
+    }
+  }
+  if (until_pattern && (match || !starting_pattern)) {
+    val += this.readUntil(until_pattern, until_after);
   }
   return val;
 };
 
-InputScanner.prototype.readUntil = function(pattern, include_match) {
+InputScanner.prototype.readUntil = function(pattern, until_after) {
   var val = '';
   var match_index = this.__position;
   pattern.lastIndex = this.__position;
   var pattern_match = pattern.exec(this.__input);
   if (pattern_match) {
-    if (include_match) {
-      match_index = pattern_match.index + pattern_match[0].length;
-    } else {
-      match_index = pattern_match.index;
+    match_index = pattern_match.index;
+    if (until_after) {
+      match_index += pattern_match[0].length;
     }
   } else {
     match_index = this.__input_length;
@@ -865,6 +1005,26 @@ InputScanner.prototype.readUntil = function(pattern, include_match) {
 
 InputScanner.prototype.readUntilAfter = function(pattern) {
   return this.readUntil(pattern, true);
+};
+
+InputScanner.prototype.get_regexp = function(pattern, match_from) {
+  var result = null;
+  var flags = 'g';
+  if (match_from && regexp_has_sticky) {
+    flags = 'y';
+  }
+  // strings are converted to regexp
+  if (typeof pattern === "string" && pattern !== '') {
+    // result = new RegExp(pattern.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), flags);
+    result = new RegExp(pattern, flags);
+  } else if (pattern) {
+    result = new RegExp(pattern.source, flags);
+  }
+  return result;
+};
+
+InputScanner.prototype.get_literal_regexp = function(literal_string) {
+  return RegExp(literal_string.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'));
 };
 
 /* css beautifier legacy helpers */
@@ -880,7 +1040,6 @@ InputScanner.prototype.lookBack = function(testVal) {
   return start >= testVal.length && this.__input.substring(start - testVal.length, start)
     .toLowerCase() === testVal;
 };
-
 
 module.exports.InputScanner = InputScanner;
 
@@ -923,6 +1082,7 @@ module.exports.InputScanner = InputScanner;
 var InputScanner = __webpack_require__(8).InputScanner;
 var Token = __webpack_require__(3).Token;
 var TokenStream = __webpack_require__(10).TokenStream;
+var WhitespacePattern = __webpack_require__(11).WhitespacePattern;
 
 var TOKEN = {
   START: 'TK_START',
@@ -934,11 +1094,9 @@ var Tokenizer = function(input_string, options) {
   this._input = new InputScanner(input_string);
   this._options = options || {};
   this.__tokens = null;
-  this.__newline_count = 0;
-  this.__whitespace_before_token = '';
 
-  this._whitespace_pattern = /[\n\r\t ]+/g;
-  this._newline_pattern = /([^\n\r]*)(\r\n|[\n\r])?/g;
+  this._patterns = {};
+  this._patterns.whitespace = new WhitespacePattern(this._input);
 };
 
 Tokenizer.prototype.tokenize = function() {
@@ -1017,25 +1175,14 @@ Tokenizer.prototype._is_closing = function(current_token, open_token) { // jshin
 };
 
 Tokenizer.prototype._create_token = function(type, text) {
-  var token = new Token(type, text, this.__newline_count, this.__whitespace_before_token);
-  this.__newline_count = 0;
-  this.__whitespace_before_token = '';
+  var token = new Token(type, text,
+    this._patterns.whitespace.newline_count,
+    this._patterns.whitespace.whitespace_before_token);
   return token;
 };
 
 Tokenizer.prototype._readWhitespace = function() {
-  var resulting_string = this._input.read(this._whitespace_pattern);
-  if (resulting_string === ' ') {
-    this.__whitespace_before_token = resulting_string;
-  } else if (resulting_string !== '') {
-    this._newline_pattern.lastIndex = 0;
-    var nextMatch = this._newline_pattern.exec(resulting_string);
-    while (nextMatch[2]) {
-      this.__newline_count += 1;
-      nextMatch = this._newline_pattern.exec(resulting_string);
-    }
-    this.__whitespace_before_token = nextMatch[1];
-  }
+  return this._patterns.whitespace.read();
 };
 
 
@@ -1164,13 +1311,226 @@ module.exports.TokenStream = TokenStream;
 
 
 
+var Pattern = __webpack_require__(12).Pattern;
+
+function WhitespacePattern(input_scanner, parent) {
+  Pattern.call(this, input_scanner, parent);
+  if (parent) {
+    this._line_regexp = this._input.get_regexp(parent._line_regexp);
+  } else {
+    this.__set_whitespace_patterns('', '');
+  }
+
+  this.newline_count = 0;
+  this.whitespace_before_token = '';
+}
+WhitespacePattern.prototype = new Pattern();
+
+WhitespacePattern.prototype.__set_whitespace_patterns = function(whitespace_chars, newline_chars) {
+  whitespace_chars += '\\t ';
+  newline_chars += '\\n\\r';
+
+  this._match_pattern = this._input.get_regexp(
+    '[' + whitespace_chars + newline_chars + ']+', true);
+  this._newline_regexp = this._input.get_regexp(
+    '\\r\\n|[' + newline_chars + ']');
+};
+
+WhitespacePattern.prototype.read = function() {
+  this.newline_count = 0;
+  this.whitespace_before_token = '';
+
+  var resulting_string = this._input.read(this._match_pattern);
+  if (resulting_string === ' ') {
+    this.whitespace_before_token = ' ';
+  } else if (resulting_string) {
+    var matches = this.__split(this._newline_regexp, resulting_string);
+    this.newline_count = matches.length - 1;
+    this.whitespace_before_token = matches[this.newline_count];
+  }
+
+  return resulting_string;
+};
+
+WhitespacePattern.prototype.matching = function(whitespace_chars, newline_chars) {
+  var result = this._create();
+  result.__set_whitespace_patterns(whitespace_chars, newline_chars);
+  result._update();
+  return result;
+};
+
+WhitespacePattern.prototype._create = function() {
+  return new WhitespacePattern(this._input, this);
+};
+
+WhitespacePattern.prototype.__split = function(regexp, input_string) {
+  regexp.lastIndex = 0;
+  var start_index = 0;
+  var result = [];
+  var next_match = regexp.exec(input_string);
+  while (next_match) {
+    result.push(input_string.substring(start_index, next_match.index));
+    start_index = next_match.index + next_match[0].length;
+    next_match = regexp.exec(input_string);
+  }
+
+  if (start_index < input_string.length) {
+    result.push(input_string.substring(start_index, input_string.length));
+  } else {
+    result.push('');
+  }
+
+  return result;
+};
+
+
+
+module.exports.WhitespacePattern = WhitespacePattern;
+
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*jshint node:true */
+/*
+
+  The MIT License (MIT)
+
+  Copyright (c) 2007-2018 Einar Lielmanis, Liam Newman, and contributors.
+
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation files
+  (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge,
+  publish, distribute, sublicense, and/or sell copies of the Software,
+  and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+  ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
+
+
+function Pattern(input_scanner, parent) {
+  this._input = input_scanner;
+  this._starting_pattern = null;
+  this._match_pattern = null;
+  this._until_pattern = null;
+  this._until_after = false;
+
+  if (parent) {
+    this._starting_pattern = this._input.get_regexp(parent._starting_pattern, true);
+    this._match_pattern = this._input.get_regexp(parent._match_pattern, true);
+    this._until_pattern = this._input.get_regexp(parent._until_pattern);
+    this._until_after = parent._until_after;
+  }
+}
+
+Pattern.prototype.read = function() {
+  var result = this._input.read(this._starting_pattern);
+  if (!this._starting_pattern || result) {
+    result += this._input.read(this._match_pattern, this._until_pattern, this._until_after);
+  }
+  return result;
+};
+
+Pattern.prototype.read_match = function() {
+  return this._input.match(this._match_pattern);
+};
+
+Pattern.prototype.until_after = function(pattern) {
+  var result = this._create();
+  result._until_after = true;
+  result._until_pattern = this._input.get_regexp(pattern);
+  result._update();
+  return result;
+};
+
+Pattern.prototype.until = function(pattern) {
+  var result = this._create();
+  result._until_after = false;
+  result._until_pattern = this._input.get_regexp(pattern);
+  result._update();
+  return result;
+};
+
+Pattern.prototype.starting_with = function(pattern) {
+  var result = this._create();
+  result._starting_pattern = this._input.get_regexp(pattern, true);
+  result._update();
+  return result;
+};
+
+Pattern.prototype.matching = function(pattern) {
+  var result = this._create();
+  result._match_pattern = this._input.get_regexp(pattern, true);
+  result._update();
+  return result;
+};
+
+Pattern.prototype._create = function() {
+  return new Pattern(this._input, this);
+};
+
+Pattern.prototype._update = function() {};
+
+module.exports.Pattern = Pattern;
+
+
+/***/ }),
+/* 13 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*jshint node:true */
+/*
+
+  The MIT License (MIT)
+
+  Copyright (c) 2007-2018 Einar Lielmanis, Liam Newman, and contributors.
+
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation files
+  (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge,
+  publish, distribute, sublicense, and/or sell copies of the Software,
+  and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+  ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
+
+
 function Directives(start_block_pattern, end_block_pattern) {
   start_block_pattern = typeof start_block_pattern === 'string' ? start_block_pattern : start_block_pattern.source;
   end_block_pattern = typeof end_block_pattern === 'string' ? end_block_pattern : end_block_pattern.source;
   this.__directives_block_pattern = new RegExp(start_block_pattern + / beautify( \w+[:]\w+)+ /.source + end_block_pattern, 'g');
   this.__directive_pattern = / (\w+)[:](\w+)/g;
 
-  this.__directives_end_ignore_pattern = new RegExp('(?:[\\s\\S]*?)((?:' + start_block_pattern + /\sbeautify\signore:end\s/.source + end_block_pattern + ')|$)', 'g');
+  this.__directives_end_ignore_pattern = new RegExp(start_block_pattern + /\sbeautify\signore:end\s/.source + end_block_pattern, 'g');
 }
 
 Directives.prototype.get_directives = function(text) {
@@ -1191,7 +1551,7 @@ Directives.prototype.get_directives = function(text) {
 };
 
 Directives.prototype.readIgnored = function(input) {
-  return input.read(this.__directives_end_ignore_pattern);
+  return input.readUntilAfter(this.__directives_end_ignore_pattern);
 };
 
 
@@ -1199,10 +1559,7 @@ module.exports.Directives = Directives;
 
 
 /***/ }),
-/* 12 */,
-/* 13 */,
-/* 14 */,
-/* 15 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1236,8 +1593,197 @@ module.exports.Directives = Directives;
 
 
 
-var Beautifier = __webpack_require__(16).Beautifier,
-  Options = __webpack_require__(17).Options;
+var Pattern = __webpack_require__(12).Pattern;
+
+
+var template_names = {
+  django: false,
+  erb: false,
+  handlebars: false,
+  php: false
+};
+
+// This lets templates appear anywhere we would do a readUntil
+// The cost is higher but it is pay to play.
+function TemplatablePattern(input_scanner, parent) {
+  Pattern.call(this, input_scanner, parent);
+  this.__template_pattern = null;
+  this._disabled = Object.assign({}, template_names);
+  this._excluded = Object.assign({}, template_names);
+
+  if (parent) {
+    this.__template_pattern = this._input.get_regexp(parent.__template_pattern);
+    this._excluded = Object.assign(this._excluded, parent._excluded);
+    this._disabled = Object.assign(this._disabled, parent._disabled);
+  }
+  var pattern = new Pattern(input_scanner);
+  this.__patterns = {
+    handlebars_comment: pattern.starting_with(/{{!--/).until_after(/--}}/),
+    handlebars: pattern.starting_with(/{{/).until_after(/}}/),
+    php: pattern.starting_with(/<\?(?:[=]|php)/).until_after(/\?>/),
+    erb: pattern.starting_with(/<%[^%]/).until_after(/[^%]%>/),
+    // django coflicts with handlebars a bit.
+    django: pattern.starting_with(/{%/).until_after(/%}/),
+    django_value: pattern.starting_with(/{{/).until_after(/}}/),
+    django_comment: pattern.starting_with(/{#/).until_after(/#}/)
+  };
+}
+TemplatablePattern.prototype = new Pattern();
+
+TemplatablePattern.prototype._create = function() {
+  return new TemplatablePattern(this._input, this);
+};
+
+TemplatablePattern.prototype._update = function() {
+  this.__set_templated_pattern();
+};
+
+TemplatablePattern.prototype.disable = function(language) {
+  var result = this._create();
+  result._disabled[language] = true;
+  result._update();
+  return result;
+};
+
+TemplatablePattern.prototype.exclude = function(language) {
+  var result = this._create();
+  result._excluded[language] = true;
+  result._update();
+  return result;
+};
+
+TemplatablePattern.prototype.read = function() {
+  var result = '';
+  if (this._match_pattern) {
+    result = this._input.read(this._starting_pattern);
+  } else {
+    result = this._input.read(this._starting_pattern, this.__template_pattern);
+  }
+  var next = this._read_template();
+  while (next) {
+    if (this._match_pattern) {
+      next += this._input.read(this._match_pattern);
+    } else {
+      next += this._input.readUntil(this.__template_pattern);
+    }
+    result += next;
+    next = this._read_template();
+  }
+
+  if (this._until_after) {
+    result += this._input.readUntilAfter(this._until_pattern);
+  }
+  return result;
+};
+
+TemplatablePattern.prototype.__set_templated_pattern = function() {
+  var items = [];
+
+  if (!this._disabled.php) {
+    items.push(this.__patterns.php._starting_pattern.source);
+  }
+  if (!this._disabled.handlebars) {
+    items.push(this.__patterns.handlebars._starting_pattern.source);
+  }
+  if (!this._disabled.erb) {
+    items.push(this.__patterns.erb._starting_pattern.source);
+  }
+  if (!this._disabled.django) {
+    items.push(this.__patterns.django._starting_pattern.source);
+    items.push(this.__patterns.django_value._starting_pattern.source);
+    items.push(this.__patterns.django_comment._starting_pattern.source);
+  }
+
+  if (this._until_pattern) {
+    items.push(this._until_pattern.source);
+  }
+  this.__template_pattern = this._input.get_regexp('(?:' + items.join('|') + ')');
+};
+
+TemplatablePattern.prototype._read_template = function() {
+  var resulting_string = '';
+  var c = this._input.peek();
+  if (c === '<') {
+    var peek1 = this._input.peek(1);
+    //if we're in a comment, do something special
+    // We treat all comments as literals, even more than preformatted tags
+    // we just look for the appropriate close tag
+    if (!this._disabled.php && !this._excluded.php && peek1 === '?') {
+      resulting_string = resulting_string ||
+        this.__patterns.php.read();
+    }
+    if (!this._disabled.erb && !this._excluded.erb && peek1 === '%') {
+      resulting_string = resulting_string ||
+        this.__patterns.erb.read();
+    }
+  } else if (c === '{') {
+    if (!this._disabled.handlebars && !this._excluded.handlebars) {
+      resulting_string = resulting_string ||
+        this.__patterns.handlebars_comment.read();
+      resulting_string = resulting_string ||
+        this.__patterns.handlebars.read();
+    }
+    if (!this._disabled.django) {
+      // django coflicts with handlebars a bit.
+      if (!this._excluded.django && !this._excluded.handlebars) {
+        resulting_string = resulting_string ||
+          this.__patterns.django_value.read();
+      }
+      if (!this._excluded.django) {
+        resulting_string = resulting_string ||
+          this.__patterns.django_comment.read();
+        resulting_string = resulting_string ||
+          this.__patterns.django.read();
+      }
+    }
+  }
+  return resulting_string;
+};
+
+
+module.exports.TemplatablePattern = TemplatablePattern;
+
+
+/***/ }),
+/* 15 */,
+/* 16 */,
+/* 17 */,
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+/*jshint node:true */
+/*
+
+  The MIT License (MIT)
+
+  Copyright (c) 2007-2018 Einar Lielmanis, Liam Newman, and contributors.
+
+  Permission is hereby granted, free of charge, to any person
+  obtaining a copy of this software and associated documentation files
+  (the "Software"), to deal in the Software without restriction,
+  including without limitation the rights to use, copy, modify, merge,
+  publish, distribute, sublicense, and/or sell copies of the Software,
+  and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be
+  included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+  EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+  NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+  BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+  ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  SOFTWARE.
+*/
+
+
+
+var Beautifier = __webpack_require__(19).Beautifier,
+  Options = __webpack_require__(20).Options;
 
 function style_html(html_source, options, js_beautify, css_beautify) {
   var beautifier = new Beautifier(html_source, options, js_beautify, css_beautify);
@@ -1251,7 +1797,7 @@ module.exports.defaultOptions = function() {
 
 
 /***/ }),
-/* 16 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1285,10 +1831,10 @@ module.exports.defaultOptions = function() {
 
 
 
-var Options = __webpack_require__(17).Options;
+var Options = __webpack_require__(20).Options;
 var Output = __webpack_require__(2).Output;
-var Tokenizer = __webpack_require__(18).Tokenizer;
-var TOKEN = __webpack_require__(18).TOKEN;
+var Tokenizer = __webpack_require__(21).Tokenizer;
+var TOKEN = __webpack_require__(21).TOKEN;
 
 var lineBreak = /\r\n|[\r\n]/;
 var allLineBreaks = /\r\n|[\r\n]/g;
@@ -1297,7 +1843,6 @@ var Printer = function(options, base_indent_string) { //handles input/output and
 
   this.indent_level = 0;
   this.alignment_size = 0;
-  this.wrap_line_length = options.wrap_line_length;
   this.max_preserve_newlines = options.max_preserve_newlines;
   this.preserve_newlines = options.preserve_newlines;
 
@@ -1309,9 +1854,16 @@ Printer.prototype.current_line_has_match = function(pattern) {
   return this._output.current_line.has_match(pattern);
 };
 
-Printer.prototype.set_space_before_token = function(value) {
+Printer.prototype.set_space_before_token = function(value, non_breaking) {
   this._output.space_before_token = value;
+  this._output.non_breaking_space = non_breaking;
 };
+
+Printer.prototype.set_wrap_point = function() {
+  this._output.set_indent(this.indent_level, this.alignment_size);
+  this._output.set_wrap_point();
+};
+
 
 Printer.prototype.add_raw_token = function(token) {
   this._output.add_raw_token(token);
@@ -1337,51 +1889,29 @@ Printer.prototype.traverse_whitespace = function(raw_token) {
   if (raw_token.whitespace_before || raw_token.newlines) {
     if (!this.print_preserved_newlines(raw_token)) {
       this._output.space_before_token = true;
-      this.print_space_or_wrap(raw_token.text);
     }
     return true;
   }
   return false;
 };
 
-// Append a space to the given content (string array) or, if we are
-// at the wrap_line_length, append a newline/indentation.
-// return true if a newline was added, false if a space was added
-Printer.prototype.print_space_or_wrap = function(text) {
-  if (this.wrap_line_length) {
-    if (this._output.current_line.get_character_count() + text.length + 1 >= this.wrap_line_length) { //insert a line when the wrap_line_length is reached
-      return this._output.add_new_line();
-    }
-  }
-  return false;
+Printer.prototype.previous_token_wrapped = function() {
+  return this._output.previous_token_wrapped;
 };
 
 Printer.prototype.print_newline = function(force) {
   this._output.add_new_line(force);
 };
 
-Printer.prototype.print_token = function(text) {
-  if (text) {
-    if (this._output.current_line.is_empty()) {
-      this._output.set_indent(this.indent_level, this.alignment_size);
-    }
-
-    this._output.add_token(text);
+Printer.prototype.print_token = function(token) {
+  if (token.text) {
+    this._output.set_indent(this.indent_level, this.alignment_size);
+    this._output.add_token(token.text);
   }
-};
-
-Printer.prototype.print_raw_text = function(text) {
-  this._output.current_line.push_raw(text);
 };
 
 Printer.prototype.indent = function() {
   this.indent_level++;
-};
-
-Printer.prototype.unindent = function() {
-  if (this.indent_level > 0) {
-    this.indent_level--;
-  }
 };
 
 Printer.prototype.get_full_indent = function(level) {
@@ -1393,28 +1923,55 @@ Printer.prototype.get_full_indent = function(level) {
   return this._output.get_indent_string(level);
 };
 
-
-var uses_beautifier = function(tag_check, start_token) {
+var get_type_attribute = function(start_token) {
+  var result = null;
   var raw_token = start_token.next;
-  if (!start_token.closed) {
-    return false;
-  }
 
-  while (raw_token.type !== TOKEN.EOF && raw_token.closed !== start_token) {
+  // Search attributes for a type attribute
+  while (raw_token.type !== TOKEN.EOF && start_token.closed !== raw_token) {
     if (raw_token.type === TOKEN.ATTRIBUTE && raw_token.text === 'type') {
-      // For script and style tags that have a type attribute, only enable custom beautifiers for matching values
-      var peekEquals = raw_token.next ? raw_token.next : raw_token;
-      var peekValue = peekEquals.next ? peekEquals.next : peekEquals;
-      if (peekEquals.type === TOKEN.EQUALS && peekValue.type === TOKEN.VALUE) {
-        return (tag_check === 'style' && peekValue.text.search('text/css') > -1) ||
-          (tag_check === 'script' && peekValue.text.search(/(text|application|dojo)\/(x-)?(javascript|ecmascript|jscript|livescript|(ld\+)?json|method|aspect)/) > -1);
+      if (raw_token.next && raw_token.next.type === TOKEN.EQUALS &&
+        raw_token.next.next && raw_token.next.next.type === TOKEN.VALUE) {
+        result = raw_token.next.next.text;
       }
-      return false;
+      break;
     }
     raw_token = raw_token.next;
   }
 
-  return true;
+  return result;
+};
+
+var get_custom_beautifier_name = function(tag_check, raw_token) {
+  var typeAttribute = null;
+  var result = null;
+
+  if (!raw_token.closed) {
+    return null;
+  }
+
+  if (tag_check === 'script') {
+    typeAttribute = 'text/javascript';
+  } else if (tag_check === 'style') {
+    typeAttribute = 'text/css';
+  }
+
+  typeAttribute = get_type_attribute(raw_token) || typeAttribute;
+
+  // For script and style tags that have a type attribute, only enable custom beautifiers for matching values
+  // For those without a type attribute use default;
+  if (typeAttribute.search('text/css') > -1) {
+    result = 'css';
+  } else if (typeAttribute.search(/(text|application|dojo)\/(x-)?(javascript|ecmascript|jscript|livescript|(ld\+)?json|method|aspect)/) > -1) {
+    result = 'javascript';
+  } else if (typeAttribute.search(/(text|application|dojo)\/(x-)?(html)/) > -1) {
+    result = 'html';
+  } else if (typeAttribute.search(/test\/null/) > -1) {
+    // Test only mime-type for testing the beautifier when null is passed as beautifing function
+    result = 'null';
+  }
+
+  return result;
 };
 
 function in_array(what, arr) {
@@ -1522,10 +2079,8 @@ Beautifier.prototype.beautify = function() {
 
   // HACK: newline parsing inconsistent. This brute force normalizes the input.
   source_text = source_text.replace(allLineBreaks, '\n');
-  var baseIndentString = '';
 
-  // Including commented out text would change existing html beautifier behavior to autodetect base indent.
-  // baseIndentString = source_text.match(/^[\t ]*/)[0];
+  var baseIndentString = source_text.match(/^[\t ]*/)[0];
 
   var last_token = {
     text: '',
@@ -1575,17 +2130,18 @@ Beautifier.prototype._handle_tag_close = function(printer, raw_token, last_tag_t
   printer.alignment_size = 0;
   last_tag_token.tag_complete = true;
 
-  printer.set_space_before_token(raw_token.newlines || raw_token.whitespace_before !== '');
+  printer.set_space_before_token(raw_token.newlines || raw_token.whitespace_before !== '', true);
   if (last_tag_token.is_unformatted) {
     printer.add_raw_token(raw_token);
   } else {
     if (last_tag_token.tag_start_char === '<') {
-      printer.set_space_before_token(raw_token.text[0] === '/'); // space before />, no space before >
+      printer.set_space_before_token(raw_token.text[0] === '/', true); // space before />, no space before >
       if (this._is_wrap_attributes_force_expand_multiline && last_tag_token.has_wrapped_attrs) {
         printer.print_newline(false);
       }
     }
-    printer.print_token(raw_token.text);
+    printer.print_token(raw_token);
+
   }
 
   if (last_tag_token.indent_content &&
@@ -1595,23 +2151,32 @@ Beautifier.prototype._handle_tag_close = function(printer, raw_token, last_tag_t
     // only indent once per opened tag
     last_tag_token.indent_content = false;
   }
+
+  if (!last_tag_token.is_inline_element &&
+    !(last_tag_token.is_unformatted || last_tag_token.is_content_unformatted)) {
+    printer.set_wrap_point();
+  }
+
   return parser_token;
 };
 
 Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_token, tokens) {
+  var wrapped = last_tag_token.has_wrapped_attrs;
   var parser_token = {
     text: raw_token.text,
     type: raw_token.type
   };
-  printer.set_space_before_token(raw_token.newlines || raw_token.whitespace_before !== '');
+
+  printer.set_space_before_token(raw_token.newlines || raw_token.whitespace_before !== '', true);
   if (last_tag_token.is_unformatted) {
     printer.add_raw_token(raw_token);
   } else if (last_tag_token.tag_start_char === '{' && raw_token.type === TOKEN.TEXT) {
     // For the insides of handlebars allow newlines or a single space between open and contents
     if (printer.print_preserved_newlines(raw_token)) {
-      printer.print_raw_text(raw_token.whitespace_before + raw_token.text);
+      raw_token.newlines = 0;
+      printer.add_raw_token(raw_token);
     } else {
-      printer.print_token(raw_token.text);
+      printer.print_token(raw_token);
     }
   } else {
     if (raw_token.type === TOKEN.ATTRIBUTE) {
@@ -1623,44 +2188,40 @@ Beautifier.prototype._handle_inside_tag = function(printer, raw_token, last_tag_
       printer.set_space_before_token(false);
     }
 
-    if (printer._output.space_before_token && last_tag_token.tag_start_char === '<') {
-      // Allow the current attribute to wrap
-      // Set wrapped to true if the line is wrapped
-      var wrapped = printer.print_space_or_wrap(raw_token.text);
-      if (raw_token.type === TOKEN.ATTRIBUTE) {
-        if (this._is_wrap_attributes_preserve || this._is_wrap_attributes_preserve_aligned) {
-          printer.traverse_whitespace(raw_token);
-          wrapped = wrapped || raw_token.newlines !== 0;
+    if (raw_token.type === TOKEN.ATTRIBUTE && last_tag_token.tag_start_char === '<') {
+      if (this._is_wrap_attributes_preserve || this._is_wrap_attributes_preserve_aligned) {
+        printer.traverse_whitespace(raw_token);
+        wrapped = wrapped || raw_token.newlines !== 0;
+      }
+
+
+      if (this._is_wrap_attributes_force) {
+        var force_attr_wrap = last_tag_token.attr_count > 1;
+        if (this._is_wrap_attributes_force_expand_multiline && last_tag_token.attr_count === 1) {
+          var is_only_attribute = true;
+          var peek_index = 0;
+          var peek_token;
+          do {
+            peek_token = tokens.peek(peek_index);
+            if (peek_token.type === TOKEN.ATTRIBUTE) {
+              is_only_attribute = false;
+              break;
+            }
+            peek_index += 1;
+          } while (peek_index < 4 && peek_token.type !== TOKEN.EOF && peek_token.type !== TOKEN.TAG_CLOSE);
+
+          force_attr_wrap = !is_only_attribute;
         }
-        // Save whether we have wrapped any attributes
-        last_tag_token.has_wrapped_attrs = last_tag_token.has_wrapped_attrs || wrapped;
 
-        if (this._is_wrap_attributes_force) {
-          var force_attr_wrap = last_tag_token.attr_count > 1;
-          if (this._is_wrap_attributes_force_expand_multiline && last_tag_token.attr_count === 1) {
-            var is_only_attribute = true;
-            var peek_index = 0;
-            var peek_token;
-            do {
-              peek_token = tokens.peek(peek_index);
-              if (peek_token.type === TOKEN.ATTRIBUTE) {
-                is_only_attribute = false;
-                break;
-              }
-              peek_index += 1;
-            } while (peek_index < 4 && peek_token.type !== TOKEN.EOF && peek_token.type !== TOKEN.TAG_CLOSE);
-
-            force_attr_wrap = !is_only_attribute;
-          }
-
-          if (force_attr_wrap) {
-            printer.print_newline(false);
-            last_tag_token.has_wrapped_attrs = true;
-          }
+        if (force_attr_wrap) {
+          printer.print_newline(false);
+          wrapped = true;
         }
       }
     }
-    printer.print_token(raw_token.text);
+    printer.print_token(raw_token);
+    wrapped = wrapped || printer.previous_token_wrapped();
+    last_tag_token.has_wrapped_attrs = wrapped;
   }
   return parser_token;
 };
@@ -1670,28 +2231,35 @@ Beautifier.prototype._handle_text = function(printer, raw_token, last_tag_token)
     text: raw_token.text,
     type: 'TK_CONTENT'
   };
-  if (last_tag_token.custom_beautifier) { //check if we need to format javascript
+  if (last_tag_token.custom_beautifier_name) { //check if we need to format javascript
     this._print_custom_beatifier_text(printer, raw_token, last_tag_token);
   } else if (last_tag_token.is_unformatted || last_tag_token.is_content_unformatted) {
     printer.add_raw_token(raw_token);
   } else {
     printer.traverse_whitespace(raw_token);
-    printer.print_token(raw_token.text);
+    printer.print_token(raw_token);
   }
   return parser_token;
 };
 
 Beautifier.prototype._print_custom_beatifier_text = function(printer, raw_token, last_tag_token) {
+  var local = this;
   if (raw_token.text !== '') {
     printer.print_newline(false);
     var text = raw_token.text,
       _beautifier,
       script_indent_level = 1;
-    if (last_tag_token.tag_name === 'script') {
-      _beautifier = typeof this._js_beautify === 'function' && this._js_beautify;
-    } else if (last_tag_token.tag_name === 'style') {
-      _beautifier = typeof this._css_beautify === 'function' && this._css_beautify;
+    if (last_tag_token.custom_beautifier_name === 'javascript' && typeof this._js_beautify === 'function') {
+      _beautifier = this._js_beautify;
+    } else if (last_tag_token.custom_beautifier_name === 'css' && typeof this._css_beautify === 'function') {
+      _beautifier = this._css_beautify;
+    } else if (last_tag_token.custom_beautifier_name === 'html') {
+      _beautifier = function(html_source, options) {
+        var beautifier = new Beautifier(html_source, options, local._js_beautify, local._css_beautify);
+        return beautifier.beautify();
+      };
     }
+
 
     if (this._options.indent_scripts === "keep") {
       script_indent_level = 0;
@@ -1716,14 +2284,18 @@ Beautifier.prototype._print_custom_beatifier_text = function(printer, raw_token,
       text = _beautifier(indentation + text, child_options);
     } else {
       // simply indent the string otherwise
-      var white = text.match(/^\s*/)[0];
-      var _level = white.match(/[^\n\r]*$/)[0].split(this._options.indent_string).length - 1;
-      var reindent = this._get_full_indent(script_indent_level - _level);
-      text = (indentation + text.trim())
-        .replace(/\r\n|\r|\n/g, '\n' + reindent);
+      var white = raw_token.whitespace_before;
+      if (white) {
+        text = text.replace(new RegExp('\n(' + white + ')?', 'g'), '\n');
+      }
+
+      text = indentation + text.replace(/\n/g, '\n' + indentation);
     }
     if (text) {
-      printer.print_raw_text(text);
+      raw_token.text = text;
+      raw_token.whitespace_before = '';
+      raw_token.newlines = 0;
+      printer.add_raw_token(raw_token);
       printer.print_newline(true);
     }
   }
@@ -1740,14 +2312,16 @@ Beautifier.prototype._handle_tag_open = function(printer, raw_token, last_tag_to
   } else {
     printer.traverse_whitespace(raw_token);
     this._set_tag_position(printer, raw_token, parser_token, last_tag_token, last_token);
-    printer.print_token(raw_token.text);
+    if (!parser_token.is_inline_element) {
+      printer.set_wrap_point();
+    }
+    printer.print_token(raw_token);
   }
 
   //indent attributes an auto, forced, aligned or forced-align line-wrap
   if (this._is_wrap_attributes_force_aligned || this._is_wrap_attributes_aligned_multiple || this._is_wrap_attributes_preserve_aligned) {
     parser_token.alignment_size = raw_token.text.length + 1;
   }
-
 
   if (!parser_token.tag_complete && !parser_token.is_unformatted) {
     printer.alignment_size = parser_token.alignment_size;
@@ -1769,7 +2343,7 @@ var TagOpenParserToken = function(parent, raw_token) {
   this.is_end_tag = false;
   this.indent_content = false;
   this.multiline_content = false;
-  this.custom_beautifier = false;
+  this.custom_beautifier_name = null;
   this.start_tag_token = null;
   this.attr_count = 0;
   this.has_wrapped_attrs = false;
@@ -1790,7 +2364,7 @@ var TagOpenParserToken = function(parent, raw_token) {
       tag_check_match = raw_token.text.match(/^<([^\s>]*)/);
       this.tag_check = tag_check_match ? tag_check_match[1] : '';
     } else {
-      tag_check_match = raw_token.text.match(/^{{\#?([^\s}]+)/);
+      tag_check_match = raw_token.text.match(/^{{[#\^]?([^\s}]+)/);
       this.tag_check = tag_check_match ? tag_check_match[1] : '';
     }
     this.tag_check = this.tag_check.toLowerCase();
@@ -1836,13 +2410,21 @@ Beautifier.prototype._set_tag_position = function(printer, raw_token, parser_tok
     } else { // it's a start-tag
       // check if this tag is starting an element that has optional end element
       // and do an ending needed
-      this._do_optional_end_element(parser_token);
+      if (this._do_optional_end_element(parser_token)) {
+        if (!parser_token.is_inline_element) {
+          if (parser_token.parent) {
+            parser_token.parent.multiline_content = true;
+          }
+          printer.print_newline(false);
+        }
+
+      }
 
       this._tag_stack.record_tag(parser_token); //push it on the tag stack
 
       if ((parser_token.tag_name === 'script' || parser_token.tag_name === 'style') &&
         !(parser_token.is_unformatted || parser_token.is_content_unformatted)) {
-        parser_token.custom_beautifier = uses_beautifier(parser_token.tag_check, raw_token);
+        parser_token.custom_beautifier_name = get_custom_beautifier_name(parser_token.tag_check, raw_token);
       }
     }
   }
@@ -1890,7 +2472,7 @@ Beautifier.prototype._set_tag_position = function(printer, raw_token, parser_tok
       printer.print_newline(false);
     }
   } else { // it's a start-tag
-    parser_token.indent_content = !parser_token.custom_beautifier;
+    parser_token.indent_content = !parser_token.custom_beautifier_name;
 
     if (parser_token.tag_start_char === '<') {
       if (parser_token.tag_name === 'html') {
@@ -1915,6 +2497,7 @@ Beautifier.prototype._set_tag_position = function(printer, raw_token, parser_tok
 //var p_closers = ['address', 'article', 'aside', 'blockquote', 'details', 'div', 'dl', 'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hr', 'main', 'nav', 'ol', 'p', 'pre', 'section', 'table', 'ul'];
 
 Beautifier.prototype._do_optional_end_element = function(parser_token) {
+  var result = null;
   // NOTE: cases of "if there is no more content in the parent element"
   // are handled automatically by the beautifier.
   // It assumes parent or ancestor close tag closes all children.
@@ -1924,52 +2507,52 @@ Beautifier.prototype._do_optional_end_element = function(parser_token) {
 
   } else if (parser_token.tag_name === 'body') {
     // A head element’s end tag may be omitted if the head element is not immediately followed by a space character or a comment.
-    this._tag_stack.try_pop('head');
+    result = result || this._tag_stack.try_pop('head');
 
     //} else if (parser_token.tag_name === 'body') {
     // DONE: A body element’s end tag may be omitted if the body element is not immediately followed by a comment.
 
   } else if (parser_token.tag_name === 'li') {
     // An li element’s end tag may be omitted if the li element is immediately followed by another li element or if there is no more content in the parent element.
-    this._tag_stack.try_pop('li', ['ol', 'ul']);
+    result = result || this._tag_stack.try_pop('li', ['ol', 'ul']);
 
   } else if (parser_token.tag_name === 'dd' || parser_token.tag_name === 'dt') {
     // A dd element’s end tag may be omitted if the dd element is immediately followed by another dd element or a dt element, or if there is no more content in the parent element.
     // A dt element’s end tag may be omitted if the dt element is immediately followed by another dt element or a dd element.
-    this._tag_stack.try_pop('dt', ['dl']);
-    this._tag_stack.try_pop('dd', ['dl']);
+    result = result || this._tag_stack.try_pop('dt', ['dl']);
+    result = result || this._tag_stack.try_pop('dd', ['dl']);
 
     //} else if (p_closers.indexOf(parser_token.tag_name) !== -1) {
     //TODO: THIS IS A BUG FARM. We are not putting this into 1.8.0 as it is likely to blow up.
     //A p element’s end tag may be omitted if the p element is immediately followed by an address, article, aside, blockquote, details, div, dl, fieldset, figcaption, figure, footer, form, h1, h2, h3, h4, h5, h6, header, hr, main, nav, ol, p, pre, section, table, or ul element, or if there is no more content in the parent element and the parent element is an HTML element that is not an a, audio, del, ins, map, noscript, or video element, or an autonomous custom element.
-    //this._tag_stack.try_pop('p', ['body']);
+    //result = result || this._tag_stack.try_pop('p', ['body']);
 
   } else if (parser_token.tag_name === 'rp' || parser_token.tag_name === 'rt') {
     // An rt element’s end tag may be omitted if the rt element is immediately followed by an rt or rp element, or if there is no more content in the parent element.
     // An rp element’s end tag may be omitted if the rp element is immediately followed by an rt or rp element, or if there is no more content in the parent element.
-    this._tag_stack.try_pop('rt', ['ruby', 'rtc']);
-    this._tag_stack.try_pop('rp', ['ruby', 'rtc']);
+    result = result || this._tag_stack.try_pop('rt', ['ruby', 'rtc']);
+    result = result || this._tag_stack.try_pop('rp', ['ruby', 'rtc']);
 
   } else if (parser_token.tag_name === 'optgroup') {
     // An optgroup element’s end tag may be omitted if the optgroup element is immediately followed by another optgroup element, or if there is no more content in the parent element.
     // An option element’s end tag may be omitted if the option element is immediately followed by another option element, or if it is immediately followed by an optgroup element, or if there is no more content in the parent element.
-    this._tag_stack.try_pop('optgroup', ['select']);
-    //this._tag_stack.try_pop('option', ['select']);
+    result = result || this._tag_stack.try_pop('optgroup', ['select']);
+    //result = result || this._tag_stack.try_pop('option', ['select']);
 
   } else if (parser_token.tag_name === 'option') {
     // An option element’s end tag may be omitted if the option element is immediately followed by another option element, or if it is immediately followed by an optgroup element, or if there is no more content in the parent element.
-    this._tag_stack.try_pop('option', ['select', 'datalist', 'optgroup']);
+    result = result || this._tag_stack.try_pop('option', ['select', 'datalist', 'optgroup']);
 
   } else if (parser_token.tag_name === 'colgroup') {
     // DONE: A colgroup element’s end tag may be omitted if the colgroup element is not immediately followed by a space character or a comment.
     // A caption element's end tag may be ommitted if a colgroup, thead, tfoot, tbody, or tr element is started.
-    this._tag_stack.try_pop('caption', ['table']);
+    result = result || this._tag_stack.try_pop('caption', ['table']);
 
   } else if (parser_token.tag_name === 'thead') {
     // A colgroup element's end tag may be ommitted if a thead, tfoot, tbody, or tr element is started.
     // A caption element's end tag may be ommitted if a colgroup, thead, tfoot, tbody, or tr element is started.
-    this._tag_stack.try_pop('caption', ['table']);
-    this._tag_stack.try_pop('colgroup', ['table']);
+    result = result || this._tag_stack.try_pop('caption', ['table']);
+    result = result || this._tag_stack.try_pop('colgroup', ['table']);
 
     //} else if (parser_token.tag_name === 'caption') {
     // DONE: A caption element’s end tag may be omitted if the caption element is not immediately followed by a space character or a comment.
@@ -1979,10 +2562,10 @@ Beautifier.prototype._do_optional_end_element = function(parser_token) {
     // A tbody element’s end tag may be omitted if the tbody element is immediately followed by a tbody or tfoot element, or if there is no more content in the parent element.
     // A colgroup element's end tag may be ommitted if a thead, tfoot, tbody, or tr element is started.
     // A caption element's end tag may be ommitted if a colgroup, thead, tfoot, tbody, or tr element is started.
-    this._tag_stack.try_pop('caption', ['table']);
-    this._tag_stack.try_pop('colgroup', ['table']);
-    this._tag_stack.try_pop('thead', ['table']);
-    this._tag_stack.try_pop('tbody', ['table']);
+    result = result || this._tag_stack.try_pop('caption', ['table']);
+    result = result || this._tag_stack.try_pop('colgroup', ['table']);
+    result = result || this._tag_stack.try_pop('thead', ['table']);
+    result = result || this._tag_stack.try_pop('tbody', ['table']);
 
     //} else if (parser_token.tag_name === 'tfoot') {
     // DONE: A tfoot element’s end tag may be omitted if there is no more content in the parent element.
@@ -1991,15 +2574,15 @@ Beautifier.prototype._do_optional_end_element = function(parser_token) {
     // A tr element’s end tag may be omitted if the tr element is immediately followed by another tr element, or if there is no more content in the parent element.
     // A colgroup element's end tag may be ommitted if a thead, tfoot, tbody, or tr element is started.
     // A caption element's end tag may be ommitted if a colgroup, thead, tfoot, tbody, or tr element is started.
-    this._tag_stack.try_pop('caption', ['table']);
-    this._tag_stack.try_pop('colgroup', ['table']);
-    this._tag_stack.try_pop('tr', ['table', 'thead', 'tbody', 'tfoot']);
+    result = result || this._tag_stack.try_pop('caption', ['table']);
+    result = result || this._tag_stack.try_pop('colgroup', ['table']);
+    result = result || this._tag_stack.try_pop('tr', ['table', 'thead', 'tbody', 'tfoot']);
 
   } else if (parser_token.tag_name === 'th' || parser_token.tag_name === 'td') {
     // A td element’s end tag may be omitted if the td element is immediately followed by a td or th element, or if there is no more content in the parent element.
     // A th element’s end tag may be omitted if the th element is immediately followed by a td or th element, or if there is no more content in the parent element.
-    this._tag_stack.try_pop('td', ['tr']);
-    this._tag_stack.try_pop('th', ['tr']);
+    result = result || this._tag_stack.try_pop('td', ['tr']);
+    result = result || this._tag_stack.try_pop('th', ['tr']);
   }
 
   // Start element omission not handled currently
@@ -2010,13 +2593,14 @@ Beautifier.prototype._do_optional_end_element = function(parser_token) {
   // Fix up the parent of the parser token
   parser_token.parent = this._tag_stack.get_parser_token();
 
+  return result;
 };
 
 module.exports.Beautifier = Beautifier;
 
 
 /***/ }),
-/* 17 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2065,16 +2649,19 @@ function Options(options) {
   this.wrap_attributes_indent_size = this._get_number('wrap_attributes_indent_size', this.indent_size);
   this.extra_liners = this._get_array('extra_liners', ['head', 'body', '/html']);
 
+  // Block vs inline elements
+  // https://developer.mozilla.org/en-US/docs/Web/HTML/Block-level_elements
+  // https://developer.mozilla.org/en-US/docs/Web/HTML/Inline_elements
+  // https://www.w3.org/TR/html5/dom.html#phrasing-content
   this.inline = this._get_array('inline', [
-    // https://www.w3.org/TR/html5/dom.html#phrasing-content
     'a', 'abbr', 'area', 'audio', 'b', 'bdi', 'bdo', 'br', 'button', 'canvas', 'cite',
     'code', 'data', 'datalist', 'del', 'dfn', 'em', 'embed', 'i', 'iframe', 'img',
     'input', 'ins', 'kbd', 'keygen', 'label', 'map', 'mark', 'math', 'meter', 'noscript',
     'object', 'output', 'progress', 'q', 'ruby', 's', 'samp', /* 'script', */ 'select', 'small',
     'span', 'strong', 'sub', 'sup', 'svg', 'template', 'textarea', 'time', 'u', 'var',
     'video', 'wbr', 'text',
-    // prexisting - not sure of full effect of removing, leaving in
-    'acronym', 'address', 'big', 'dt', 'ins', 'strike', 'tt'
+    // obsolete inline tags
+    'acronym', 'big', 'strike', 'tt'
   ]);
   this.void_elements = this._get_array('void_elements', [
     // HTLM void elements - aka self-closing tags - aka singletons
@@ -2086,15 +2673,17 @@ function Options(options) {
 
     // Doctype and xml elements
     '!doctype', '?xml',
-    // ?php and ?= tags
-    '?php', '?=',
-    // other tags that were in this list, keeping just in case
+
+    // obsolete tags
+    // basefont: https://www.computerhope.com/jargon/h/html-basefont-tag.htm
+    // isndex: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/isindex
     'basefont', 'isindex'
   ]);
   this.unformatted = this._get_array('unformatted', []);
   this.content_unformatted = this._get_array('content_unformatted', [
     'pre', 'textarea'
   ]);
+  this.unformatted_content_delimiter = this._get_characters('unformatted_content_delimiter');
   this.indent_scripts = this._get_selection('indent_scripts', ['normal', 'keep', 'separate']);
 }
 Options.prototype = new BaseOptions();
@@ -2105,7 +2694,7 @@ module.exports.Options = Options;
 
 
 /***/ }),
-/* 18 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2141,7 +2730,9 @@ module.exports.Options = Options;
 
 var BaseTokenizer = __webpack_require__(9).Tokenizer;
 var BASETOKEN = __webpack_require__(9).TOKEN;
-var Directives = __webpack_require__(11).Directives;
+var Directives = __webpack_require__(13).Directives;
+var TemplatablePattern = __webpack_require__(14).TemplatablePattern;
+var Pattern = __webpack_require__(12).Pattern;
 
 var TOKEN = {
   TAG_OPEN: 'TK_TAG_OPEN',
@@ -2165,7 +2756,39 @@ var Tokenizer = function(input_string, options) {
 
   // Words end at whitespace or when a tag starts
   // if we are indenting handlebars, they are considered tags
-  this._word_pattern = this._options.indent_handlebars ? /[\n\r\t <]|{{/g : /[\n\r\t <]/g;
+  var templatable_reader = new TemplatablePattern(this._input);
+  var pattern_reader = new Pattern(this._input);
+
+  this.__patterns = {
+    word: templatable_reader.until(/[\n\r\t <]/),
+    single_quote: templatable_reader.until_after(/'/),
+    double_quote: templatable_reader.until_after(/"/),
+    attribute: templatable_reader.until(/[\n\r\t =\/>]/),
+    element_name: templatable_reader.until(/[\n\r\t >\/]/),
+
+    handlebars_comment: pattern_reader.starting_with(/{{!--/).until_after(/--}}/),
+    handlebars: pattern_reader.starting_with(/{{/).until_after(/}}/),
+    handlebars_open: pattern_reader.until(/[\n\r\t }]/),
+    handlebars_raw_close: pattern_reader.until(/}}/),
+    comment: pattern_reader.starting_with(/<!--/).until_after(/-->/),
+    cdata: pattern_reader.starting_with(/<!\[cdata\[/).until_after(/]]>/),
+    // https://en.wikipedia.org/wiki/Conditional_comment
+    conditional_comment: pattern_reader.starting_with(/<!\[/).until_after(/]>/),
+    processing: pattern_reader.starting_with(/<\?/).until_after(/\?>/)
+  };
+
+  if (this._options.indent_handlebars) {
+    this.__patterns.word = this.__patterns.word.exclude('handlebars');
+  }
+
+  this._unformatted_content_delimiter = null;
+
+  if (this._options.unformatted_content_delimiter) {
+    var literal_regexp = this._input.get_literal_regexp(this._options.unformatted_content_delimiter);
+    this.__patterns.unformatted_content_delimiter =
+      pattern_reader.matching(literal_regexp)
+      .until_after(literal_regexp);
+  }
 };
 Tokenizer.prototype = new BaseTokenizer();
 
@@ -2189,20 +2812,21 @@ Tokenizer.prototype._reset = function() {
 };
 
 Tokenizer.prototype._get_next_token = function(previous_token, open_token) { // jshint unused:false
-  this._readWhitespace();
   var token = null;
+  this._readWhitespace();
   var c = this._input.peek();
 
   if (c === null) {
     return this._create_token(TOKEN.EOF, '');
   }
 
+  token = token || this._read_open_handlebars(c, open_token);
   token = token || this._read_attribute(c, previous_token, open_token);
   token = token || this._read_raw_content(previous_token, open_token);
+  token = token || this._read_close(c, open_token);
+  token = token || this._read_content_word(c);
   token = token || this._read_comment(c);
   token = token || this._read_open(c, open_token);
-  token = token || this._read_close(c, open_token);
-  token = token || this._read_content_word();
   token = token || this._create_token(TOKEN.UNKNOWN, this._input.next());
 
   return token;
@@ -2210,71 +2834,32 @@ Tokenizer.prototype._get_next_token = function(previous_token, open_token) { // 
 
 Tokenizer.prototype._read_comment = function(c) { // jshint unused:false
   var token = null;
-  if (c === '<' || c === '{') {
+  var resulting_string = null;
+  var directives = null;
+
+  if (c === '<') {
     var peek1 = this._input.peek(1);
-    var peek2 = this._input.peek(2);
-    if ((c === '<' && (peek1 === '!' || peek1 === '?' || peek1 === '%')) ||
-      this._options.indent_handlebars && c === '{' && peek1 === '{' && peek2 === '!') {
-      //if we're in a comment, do something special
-      // We treat all comments as literals, even more than preformatted tags
-      // we just look for the appropriate close tag
+    //if we're in a comment, do something special
+    // We treat all comments as literals, even more than preformatted tags
+    // we just look for the appropriate close tag
+    if (c === '<' && (peek1 === '!' || peek1 === '?')) {
+      resulting_string = this.__patterns.comment.read();
 
-      // this is will have very poor perf, but will work for now.
-      var comment = '',
-        delimiter = '>',
-        matched = false;
-
-      var input_char = this._input.next();
-
-      while (input_char) {
-        comment += input_char;
-
-        // only need to check for the delimiter if the last chars match
-        if (comment.charAt(comment.length - 1) === delimiter.charAt(delimiter.length - 1) &&
-          comment.indexOf(delimiter) !== -1) {
-          break;
+      // only process directive on html comments
+      if (resulting_string) {
+        directives = directives_core.get_directives(resulting_string);
+        if (directives && directives.ignore === 'start') {
+          resulting_string += directives_core.readIgnored(this._input);
         }
-
-        // only need to search for custom delimiter for the first few characters
-        if (!matched) {
-          matched = comment.length > 10;
-          if (comment.indexOf('<![if') === 0) { //peek for <![if conditional comment
-            delimiter = '<![endif]>';
-            matched = true;
-          } else if (comment.indexOf('<![cdata[') === 0) { //if it's a <[cdata[ comment...
-            delimiter = ']]>';
-            matched = true;
-          } else if (comment.indexOf('<![') === 0) { // some other ![ comment? ...
-            delimiter = ']>';
-            matched = true;
-          } else if (comment.indexOf('<!--') === 0) { // <!-- comment ...
-            delimiter = '-->';
-            matched = true;
-          } else if (comment.indexOf('{{!--') === 0) { // {{!-- handlebars comment
-            delimiter = '--}}';
-            matched = true;
-          } else if (comment.indexOf('{{!') === 0) { // {{! handlebars comment
-            if (comment.length === 5 && comment.indexOf('{{!--') === -1) {
-              delimiter = '}}';
-              matched = true;
-            }
-          } else if (comment.indexOf('<?') === 0) { // {{! handlebars comment
-            delimiter = '?>';
-            matched = true;
-          } else if (comment.indexOf('<%') === 0) { // {{! handlebars comment
-            delimiter = '%>';
-            matched = true;
-          }
-        }
-
-        input_char = this._input.next();
+      } else {
+        resulting_string = this.__patterns.cdata.read();
+        resulting_string = resulting_string || this.__patterns.conditional_comment.read();
+        resulting_string = resulting_string || this.__patterns.processing.read();
       }
+    }
 
-      var directives = directives_core.get_directives(comment);
-      if (directives && directives.ignore === 'start') {
-        comment += directives_core.readIgnored(this._input);
-      }
-      token = this._create_token(TOKEN.COMMENT, comment);
+    if (resulting_string) {
+      token = this._create_token(TOKEN.COMMENT, resulting_string);
       token.directives = directives;
     }
   }
@@ -2287,15 +2872,36 @@ Tokenizer.prototype._read_open = function(c, open_token) {
   var token = null;
   if (!open_token) {
     if (c === '<') {
-      resulting_string = this._input.read(/<(?:[^\n\r\t >{][^\n\r\t >{/]*)?/g);
-      token = this._create_token(TOKEN.TAG_OPEN, resulting_string);
-    } else if (this._options.indent_handlebars && c === '{' && this._input.peek(1) === '{') {
-      resulting_string = this._input.readUntil(/[\n\r\t }]/g);
+
+      resulting_string = this._input.next();
+      if (this._input.peek() === '/') {
+        resulting_string += this._input.next();
+      }
+      resulting_string += this.__patterns.element_name.read();
       token = this._create_token(TOKEN.TAG_OPEN, resulting_string);
     }
   }
   return token;
 };
+
+Tokenizer.prototype._read_open_handlebars = function(c, open_token) {
+  var resulting_string = null;
+  var token = null;
+  if (!open_token) {
+    if (this._options.indent_handlebars && c === '{' && this._input.peek(1) === '{') {
+      if (this._input.peek(2) === '!') {
+        resulting_string = this.__patterns.handlebars_comment.read();
+        resulting_string = resulting_string || this.__patterns.handlebars.read();
+        token = this._create_token(TOKEN.COMMENT, resulting_string);
+      } else {
+        resulting_string = this.__patterns.handlebars_open.read();
+        token = this._create_token(TOKEN.TAG_OPEN, resulting_string);
+      }
+    }
+  }
+  return token;
+};
+
 
 Tokenizer.prototype._read_close = function(c, open_token) {
   var resulting_string = null;
@@ -2326,25 +2932,14 @@ Tokenizer.prototype._read_attribute = function(c, previous_token, open_token) {
       token = this._create_token(TOKEN.EQUALS, this._input.next());
     } else if (c === '"' || c === "'") {
       var content = this._input.next();
-      var input_string = '';
-      var string_pattern = new RegExp(c + '|{{', 'g');
-      while (this._input.hasNext()) {
-        input_string = this._input.readUntilAfter(string_pattern);
-        content += input_string;
-        if (input_string[input_string.length - 1] === '"' || input_string[input_string.length - 1] === "'") {
-          break;
-        } else if (this._input.hasNext()) {
-          content += this._input.readUntilAfter(/}}/g);
-        }
+      if (c === '"') {
+        content += this.__patterns.double_quote.read();
+      } else {
+        content += this.__patterns.single_quote.read();
       }
-
       token = this._create_token(TOKEN.VALUE, content);
     } else {
-      if (c === '{' && this._input.peek(1) === '{') {
-        resulting_string = this._input.readUntilAfter(/}}/g);
-      } else {
-        resulting_string = this._input.readUntil(/[\n\r\t =\/>]/g);
-      }
+      resulting_string = this.__patterns.attribute.read();
 
       if (resulting_string) {
         if (previous_token.type === TOKEN.EQUALS) {
@@ -2372,7 +2967,7 @@ Tokenizer.prototype._is_content_unformatted = function(tag_name) {
 Tokenizer.prototype._read_raw_content = function(previous_token, open_token) { // jshint unused:false
   var resulting_string = '';
   if (open_token && open_token.text[0] === '{') {
-    resulting_string = this._input.readUntil(/}}/g);
+    resulting_string = this.__patterns.handlebars_raw_close.read();
   } else if (previous_token.type === TOKEN.TAG_CLOSE && (previous_token.opened.text[0] === '<')) {
     var tag_name = previous_token.opened.text.substr(1).toLowerCase();
     if (this._is_content_unformatted(tag_name)) {
@@ -2387,9 +2982,17 @@ Tokenizer.prototype._read_raw_content = function(previous_token, open_token) { /
   return null;
 };
 
-Tokenizer.prototype._read_content_word = function() {
-  // if we get here and we see handlebars treat them as plain text
-  var resulting_string = this._input.readUntil(this._word_pattern);
+Tokenizer.prototype._read_content_word = function(c) {
+  var resulting_string = '';
+  if (this._options.unformatted_content_delimiter) {
+    if (c === this._options.unformatted_content_delimiter[0]) {
+      resulting_string = this.__patterns.unformatted_content_delimiter.read();
+    }
+  }
+
+  if (!resulting_string) {
+    resulting_string = this.__patterns.word.read();
+  }
   if (resulting_string) {
     return this._create_token(TOKEN.TEXT, resulting_string);
   }
