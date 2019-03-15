@@ -1,7 +1,7 @@
 {
   "name": "brackets-beautify",
   "title": "Beautify",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "description": "Format JavaScript, HTML, and CSS files and related languages.",
   "engines": {
     "brackets": ">=1.7.0"

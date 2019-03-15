@@ -163,7 +163,7 @@ define(function (require, exports, module) {
              */
             if (document.getLanguage().getId() === 'html' && isLiveDevelopmentActive()) {
                 // Regex to match everything inside <html> beginning by the first tag and ending at the last
-                var match = /((?:.|\n)*<html[^>]*>\s*)((?:.|\n)*?)(\s*<\/html>)/gm.exec(unformattedText);
+                var match = /((?:.|\n)*?<html[^>]*?>\s*)((?:.|\n)*)(\s*<\/html>)/gm.exec(unformattedText);
                 if (match) {
                     unformattedText = match[2];
                     range = {
