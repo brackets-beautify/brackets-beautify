@@ -39,6 +39,7 @@
     "it",
     "ja",
     "pl",
+    "pt-br",
     "ro",
     "zh-cn",
     "ru"
@@ -55,6 +56,9 @@
     },
     "pl": {
       "description": "Formatuj pliki JavaScript, HTML, i CSS i powiązane języki."
+    },
+    "pt-br": {
+      "description": "Formate arquivos JavaScript, HTML, CSS e linguagens relacionados."
     },
     "ro": {
       "description": "Formatează fișiere JavaScript, HTML și CSS și alte limbaje apropiate."
