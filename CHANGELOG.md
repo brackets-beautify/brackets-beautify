@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
+## 2.8.0 - 2019-03-30
+### Added
+- Portuguese (Brazilian) Translation, thanks to [__@ArturGuedes__](https://github.com/ArturGuedes)
+
+### Changed
+- Updated `js-beautify` to version 1.9.1
+
+
 ## 2.7.1 - 2019-03-15
 ### Fixed
 - Handling of JS containing HTML tags inside HTML documents during Live Preview (see [#277](https://github.com/brackets-beautify/brackets-beautify/issues/277))
