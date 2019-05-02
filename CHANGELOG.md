@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
+## 2.9.0 - 2019-05-01
+### Changed
+- Updated `js-beautify` to version 1.10.0
+
+
 ## 2.8.0 - 2019-03-30
 ### Added
 - Portuguese (Brazilian) Translation, thanks to [__@ArturGuedes__](https://github.com/ArturGuedes)
