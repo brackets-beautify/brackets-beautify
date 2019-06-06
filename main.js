@@ -40,6 +40,14 @@ define(function (require, exports, module) {
         less: 'css',
         scss: 'css'
     };
+    var LANGUAGE_OPTIONS = {
+        php: {
+            templating: 'php',
+        },
+        handlebars: {
+            templating: 'handlebars',
+        },
+    };
 
     /* beautify preserve:start *//* eslint-disable no-multi-spaces */
     var CommandManager     = brackets.getModule('command/CommandManager');
@@ -113,7 +121,8 @@ define(function (require, exports, module) {
     function format(autoSave) {
         var document = DocumentManager.getCurrentDocument();
         var beautifiers = $.extend({}, LANGUAGE_MAPPING, prefs.get(PREF_LANGUAGES_ID));
-        var beautifier = beautifiers[document.getLanguage().getId()];
+        var languageId = document.getLanguage().getId();
+        var beautifier = beautifiers[languageId];
 
         if (!beautifier && !autoSave) {
             var Dialog = Dialogs.showModalDialog(DefaultDialogs.DIALOG_ID_ERROR, Strings.UNSUPPORTED_TITLE, DialogContent);
@@ -125,7 +134,7 @@ define(function (require, exports, module) {
 
         var unformattedText;
         var editor = EditorManager.getCurrentFullEditor();
-        var currentOptions = $.extend({}, options[beautifier] || options);
+        var currentOptions = $.extend({}, LANGUAGE_OPTIONS[languageId] || {}, options[beautifier] || options);
         if (Editor.getUseTabChar()) {
             currentOptions.indent_with_tabs = true;
         } else {
