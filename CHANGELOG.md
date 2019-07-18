@@ -3,6 +3,11 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
+## 2.9.2 - 2019-07-17
+### Changed
+- Updated `js-beautify` to version 1.10.1
+
+
 ## 2.9.1 - 2019-06-06
 ### Fixed
 - Set `templating`-option to document language if possible (see [#284](https://github.com/brackets-beautify/brackets-beautify/issues/284))
