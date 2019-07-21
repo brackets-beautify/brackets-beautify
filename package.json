@@ -71,7 +71,7 @@
     }
   },
   "devDependencies": {
-    "eslint": "6.0.x",
+    "eslint": "~6.1.0",
     "js-beautify": "1.10.1",
     "tar-to-zip": "2.0.x"
   },
