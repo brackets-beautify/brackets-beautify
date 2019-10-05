@@ -7,7 +7,7 @@
 
 
 # Brackets Beautify
-[Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.10.0][js-beautify version].
+[Brackets][Brackets] Extension that formats open HTML, CSS, and JavaScript files using [js-beautify][js-beautify] version [1.10.2][js-beautify version].
 
 ## Installation
 ### Latest Release
@@ -186,7 +186,7 @@ Brackets Beautify is licensed under the [MIT license][MIT]. [js-beautify][js-bea
 [Beautify External Formatters]: https://github.com/brackets-beautify/brackets-beautify#external-formatters
 [Beautify latest release]: https://github.com/brackets-beautify/brackets-beautify/releases/latest
 [js-beautify]: https://github.com/beautify-web/js-beautify
-[js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v1100
+[js-beautify version]: https://github.com/beautify-web/js-beautify/blob/master/CHANGELOG.md#v1102
 [js-beautify issues]: https://github.com/beautify-web/js-beautify/issues
 [js-beautify options]: https://github.com/beautify-web/js-beautify#options
 [MIT]: http://opensource.org/licenses/MIT

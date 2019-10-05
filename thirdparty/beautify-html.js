@@ -1,5 +1,5 @@
 // copied from js-beautify/js/lib/beautify-html.js
-// version: 1.10.1
+// version: 1.10.2
 /* AUTO-GENERATED. DO NOT MODIFY. */
 /*
 
@@ -1630,6 +1630,7 @@ function TemplatablePattern(input_scanner, parent) {
   var pattern = new Pattern(input_scanner);
   this.__patterns = {
     handlebars_comment: pattern.starting_with(/{{!--/).until_after(/--}}/),
+    handlebars_unescaped: pattern.starting_with(/{{{/).until_after(/}}}/),
     handlebars: pattern.starting_with(/{{/).until_after(/}}/),
     php: pattern.starting_with(/<\?(?:[=]|php)/).until_after(/\?>/),
     erb: pattern.starting_with(/<%[^%]/).until_after(/[^%]%>/),
@@ -1740,6 +1741,8 @@ TemplatablePattern.prototype._read_template = function() {
     if (!this._disabled.handlebars && !this._excluded.handlebars) {
       resulting_string = resulting_string ||
         this.__patterns.handlebars_comment.read();
+      resulting_string = resulting_string ||
+        this.__patterns.handlebars_unescaped.read();
       resulting_string = resulting_string ||
         this.__patterns.handlebars.read();
     }
