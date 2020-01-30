@@ -36,6 +36,7 @@
     "en",
     "es",
     "fa",
+    "fr",
     "it",
     "ja",
     "pl",
@@ -50,6 +51,9 @@
     },
     "fa": {
       "description": "قالب‌بندی فایل‌های جاوااسکریپت، HTML و CSS و زبان‌های مرتبط."
+    },
+    "fr": {
+      "description": "Formate JavaScript, HTML, les fichiers CSS et les langages liés."
     },
     "it": {
       "description": "Formato JavaScript, HTML e file CSS e linguaggi affini."
