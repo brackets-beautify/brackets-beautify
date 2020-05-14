@@ -1,6 +1,4 @@
 [![npm Version](https://img.shields.io/npm/v/brackets-beautify.svg)](https://www.npmjs.com/package/brackets-beautify)
-[![Brackets Extension Registry Version](https://badges.ml/brackets-beautify/version.svg)](https://brackets-extension-badges.github.io#brackets-beautify)
-[![Brackets Extension Registry Downloads](https://badges.ml/brackets-beautify/total.svg)](https://brackets-extension-badges.github.io#brackets-beautify)
 
 [![Build Status](https://travis-ci.org/brackets-beautify/brackets-beautify.svg?branch=master)](https://travis-ci.org/brackets-beautify/brackets-beautify)
 [![Greenkeeper badge](https://badges.greenkeeper.io/brackets-beautify/brackets-beautify.svg)](https://greenkeeper.io/)
