@@ -1,6 +1,6 @@
 define(function (require, exports, module) {
     'use strict';
-
+/*Variables Decleared*/
     var PREFIX = 'bb.beautify';
     var COMMAND_ID = PREFIX + '.beautify';
     var COMMAND_SAVE_ID = PREFIX + '.autosave';
