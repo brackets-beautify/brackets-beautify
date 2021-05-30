@@ -3,7 +3,7 @@ All notable changes to this project will be documented in this file.
 This project tries to adhere to [Semantic Versioning](http://semver.org/).
 
 
-## Unreleased
+## 2.13.0 - 2021-05-30
 ### Changed
 - Updated `js-beautify` to version 1.13.13
 
