@@ -41,6 +41,9 @@ define(function (require, exports, module) {
         scss: 'css'
     };
     var LANGUAGE_OPTIONS = {
+        xml: {
+            inline: []
+        },
         php: {
             templating: 'php',
         },
